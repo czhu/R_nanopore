@@ -6,6 +6,8 @@ print_seq_w_feature = function(x,featureRange,featureBase="X",
             seq(1,max(c(nchar(s),width)),width),
             seq(min(c(nchar(s),width)),max(c(nchar(s),width)),width))
     }
+    myrange = IRanges(start(featureRange), end(featureRange))
+    bins <- disjointBins(myrange)
 
     if(!is.character(x)) x= as.character(x)
 
@@ -13,21 +15,29 @@ print_seq_w_feature = function(x,featureRange,featureBase="X",
         featureBase = rep(featureBase,length(featureRange))
     }
 
-    ## in line replacement
-    rv = rep(" ",nchar(x))
-    rv[as.integer(featureRange)] = rep(featureBase,width(featureRange))
-
     outPretty = mystringwrap(x,lineWidth)
-    rvPretty = rep("\n",3*length(outPretty))
-    rvPretty[seq(1,length(rvPretty),3)] = outPretty
-    rvPretty[seq(2,length(rvPretty),3)] = mystringwrap(paste(rv, collapse=""),lineWidth)
+    nLinePerEntry = 1+max(bins)
+    rvPretty = rep("\n", nLinePerEntry * length(outPretty))
+
+    rvPretty[seq(1,length(rvPretty),nLinePerEntry)] = outPretty
+    for(thisBin in unique(bins)){
+        ## in line replacement
+        wh = bins==thisBin
+        rv = rep(" ",nchar(x))
+        rv[as.integer(myrange[wh])] = rep(featureBase[wh],width(myrange[wh]))
+
+        rvPretty[seq(thisBin+1,length(rvPretty),nLinePerEntry)] = mystringwrap(paste(rv, collapse=""),lineWidth)
+    }
+    #rvPretty = rvPretty[rvPretty!=paste(rep(" ",lineWidth),collapse="")]
 
     if(!missing(header)){
         rvPretty = c(header,rvPretty)
     }
 
     if(!missing(outfile)){
-        writeLines(rvPretty,file(outfile, open = ifelse(append,"a","w")))
+        mycon = file(outfile, open = ifelse(append,"a","w"))
+        writeLines(rvPretty,mycon)
+        close(mycon)
     }
 
     rvPretty

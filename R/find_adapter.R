@@ -7,17 +7,17 @@ find_adapter = function(thisRead,featureType="adapter",
         "rev"="GTACTCTGCGTTGATACCACTGCTTGCGGCCGCTATA"
         ),
     featureAlternative=list(
-            "fwd"="AAGCAGTGGTATCAACGCAGAGTACAT",
-            "rev"="ATGTACTCTGCGTTGATACCACTGCTT"
+            "fwd"="AAGCAGTGGTATCAACGCAGAGTAC",
+            "rev"="GTACTCTGCGTTGATACCACTGCTT"
         ),tol=0.2){
 
     rv = matchPatternStranded(feature$fwd, feature$rev, thisRead$read, thisRead$qname, tol=tol)
-    if(!missing(featureAlternative)){
+    if(!is.null(featureAlternative)){
         rv2 = matchPatternStranded(featureAlternative$fwd, featureAlternative$rev, thisRead$read,
             thisRead$qname, tol=tol)
         rv = c(rv2[!rv2 %within% rv],rv)
     }
 
-    rv$featureType=featureType
+    rv$featureType=rep(featureType,length(rv))
     rv
 }

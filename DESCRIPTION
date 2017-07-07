@@ -1,12 +1,16 @@
 Package: nanopore
 Type: Package
 Title: Analysing Nanopore RNA-seq data
-Version: 0.01
-Date: 2017-06-28
+Version: 0.02
+Date: 2017-07-09
 Author: Chenchen Zhu
 Maintainer: Chenchen Zhu <czhu@embl.de>
 Description: QC, adapter trimming, visualizing
 License: GPL
 Depends:
-    Biostrings
-    GenomicRanges
+    Biostrings,
+    GenomicRanges,
+    ShortRead,
+    ggplot2,
+    scales,
+    dplyr

@@ -5,6 +5,6 @@ find_hairpin = function(thisRead,featureType="hairpin",
         "rev"="GTCGTATCCAGTGCGAATACCTCGGACCCTGCACTGGATACGAC"
         ),tol=0.2){
     rv = matchPatternStranded(feature$fwd, feature$rev, thisRead$read, thisRead$qname, tol=tol)
-    rv$featureType=featureType
+    rv$featureType=rep(featureType,length(rv))
     rv
 }
