@@ -1,9 +1,14 @@
 plot_length_dist = function(ss,main=""){
     ## https://stackoverflow.com/questions/24646594/how-to-improve-the-aspect-of-ggplot-histograms-with-log-scales-and-discrete-valu
-    dd = ss %>% mutate(length = replace(sequence_length_template,sequence_length_template<400,400)) %>%
-        mutate(length = replace(length,length>10000,10000))
+    lowEnd = 200
+    highEnd = 10000
+    midPoint = 4000 # below this go with stepSizeShort above this with stepSizeLong for breaks
+    stepSizeShort = 200
+    stepSizeLong = 1000
+    breaks = c(seq(lowEnd,midPoint,by=stepSizeShort),seq(midPoint,highEnd,by=stepSizeLong)[-1])
 
-    breaks = c(seq(400,3800,by=200),seq(4000,10000,by=1000))
+    dd = ss %>% mutate(length = replace(sequence_length_template,sequence_length_template<lowEnd,lowEnd)) %>%
+        mutate(length = replace(length,length>highEnd,highEnd))
 
     x.p25.log <- quantile(dd$length, 0.25)
     x.median.log <- median(dd$length)
