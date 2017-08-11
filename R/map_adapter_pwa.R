@@ -1,5 +1,5 @@
 map_adapter_pwa = function(fq,adapters, windowSize = 200,mapEnd = FALSE, minLength = 10, ncpu=20,
-    outfile) {
+    outfile,gapOpening=4,gapExtension=2) {
     ### caveat only find the first hit!!!
     require(ShortRead)
     require(Biostrings)
@@ -23,7 +23,7 @@ map_adapter_pwa = function(fq,adapters, windowSize = 200,mapEnd = FALSE, minLeng
         #cat(i,"\n")
         pwa = pairwiseAlignment(adapters,
             sread(mysubseq)[i],type="overlap",
-            gapOpening=4,gapExtension=2)
+            gapOpening=gapOpening,gapExtension=gapExtension)
 
         if(any( Biostrings::nchar(pwa) > minLength)){
             mys = score(pwa)
@@ -80,5 +80,5 @@ summarise_map_adapter_pwa = function(fwdFile,revFile){
     message(mean(is.na(myfwd$adapter))," fwd adapter")
     message(mean(is.na(myrev$adapter))," rev adapter")
 
-    inner_join(myfwd,myrev,by=c("readName"="readName"))
+    full_join(myfwd,myrev,by=c("readName"="readName"))
 }
