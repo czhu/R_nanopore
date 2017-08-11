@@ -69,3 +69,16 @@ map_adapter_pwa = function(fq,adapters, windowSize = 200,mapEnd = FALSE, minLeng
         return(rv)
     }
 }
+
+summarise_map_adapter_pwa = function(fwdFile,revFile){
+    ## summarise the results from identyfing adapters using pwa
+    require(tidyverse)
+
+    myfwd = read_tsv(fwdFile)
+    myrev = read_tsv(revFile)
+
+    message(mean(is.na(myfwd$adapter))," fwd adapter")
+    message(mean(is.na(myrev$adapter))," rev adapter")
+
+    inner_join(myfwd,myrev,by=c("readName"="readName"))
+}
