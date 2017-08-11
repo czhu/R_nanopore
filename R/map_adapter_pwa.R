@@ -25,7 +25,7 @@ map_adapter_pwa = function(fq,adapters, windowSize = 200,mapEnd = FALSE, minLeng
             sread(mysubseq)[i],type="overlap",
             gapOpening=4,gapExtension=2)
 
-        if(any(nchar(pwa) > minLength)){
+        if(any( Biostrings::nchar(pwa) > minLength)){
             mys = score(pwa)
             ## chooe the one with highest score if that's also the one with the higest score
             ## otherwise the longest alignment
