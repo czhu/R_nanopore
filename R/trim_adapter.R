@@ -21,10 +21,11 @@ reduce_column = function(x,columanToRemove=c("group","hit")){
 
 ## current pipeline to trim reads
 trim_adapter = function(infile, adapters, outfolder="workspace",ncpu=20,readsChunkSize = 1e5,
-    minMedianQualityScore = 1, minReadLength = 100, middleAdaptersTolerance=0.15, windowSize = 300) {
+    saveLog=TRUE, minMedianQualityScore = 1, minReadLength = 100, middleAdaptersTolerance=0.15, windowSize = 300) {
     ## infile -> path to fastq file
     ## adapter -> named DNAStringSet
     polyADistanceToAdapter = 50
+    if(!file.exists(outfolder)) dir.create(outfolder)
 
     ## output files
     outFileFilteredReads = file.path(outfolder,"reads_qc_failed.fastq.gz")
@@ -45,7 +46,9 @@ trim_adapter = function(infile, adapters, outfolder="workspace",ncpu=20,readsChu
     ####################
     ## read in chunks with FastqStream
     fs= FastqStreamer(infile,n=readsChunkSize)
-    sink(file=file(processlogFile, open = "wt"),type="message")
+    if(saveLog) {
+        sink(file=file(processlogFile, open = "wt"),type="message")
+    }    
     while (length(fq <- yield(fs))) {
         message("Processing ", length(fq)," Reads starting at read ", nRead+1)
         ##################
@@ -53,7 +56,7 @@ trim_adapter = function(infile, adapters, outfolder="workspace",ncpu=20,readsChu
         ##################
         seqStats = tibble(
             seqnames = sapply(strsplit(as.character(ShortRead::id(fq))," "),"[",1),
-            median_qscore = median(get_quality(x)),
+            median_qscore = median(get_quality(fq)),
             read_length = width(fq),
         ) %>% mutate(qc_pass=median_qscore >= minMedianQualityScore & read_length >= minReadLength)
 
