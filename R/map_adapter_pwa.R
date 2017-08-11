@@ -23,9 +23,9 @@ map_adapter_pwa = function(fq,adapters, windowSize = 200,mapEnd = FALSE, minLeng
         #cat(i,"\n")
         pwa = pairwiseAlignment(adapters,
             sread(mysubseq)[i],type="overlap",
-            gapOpening=5,gapExtension=2)
+            gapOpening=4,gapExtension=2)
 
-        if(any(nchar(pwa) >= minLength)){
+        if(any(nchar(pwa) > minLength)){
             mys = score(pwa)
             ## chooe the one with highest score if that's also the one with the higest score
             ## otherwise the longest alignment
@@ -63,7 +63,7 @@ map_adapter_pwa = function(fq,adapters, windowSize = 200,mapEnd = FALSE, minLeng
     }
     if(!missing(outfile)){
         toAppend = ifelse(file.exists(outfile),TRUE,FALSE)
-        write.table(rv,outfile,append=TRUE,quote=FALSE,row.names=FALSE,
+        write.table(rv,outfile,append=toAppend,quote=FALSE,row.names=FALSE,
             col.names=!toAppend, sep="\t")
     } else {
         return(rv)
