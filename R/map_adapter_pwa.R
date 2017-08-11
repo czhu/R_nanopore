@@ -30,7 +30,8 @@ map_adapter_pwa = function(fq,adapters, windowSize = 200,mapEnd = FALSE, minLeng
             ## chooe the one with highest score if that's also the one with the higest score
             ## otherwise the longest alignment
             ## problem, short alignment from end better than full alignment
-            wh = ifelse(which.max(nchar(pwa)) == which.max(mys),which.max(mys),which.max(nchar(pwa)))
+            wh = ifelse(which.max(Biostrings::nchar(pwa)) == which.max(mys),
+                which.max(mys),which.max(Biostrings::nchar(pwa)))
             rv = list(
                 readName = readNames[i],
                 adapter = names(adapters)[wh],
@@ -38,7 +39,9 @@ map_adapter_pwa = function(fq,adapters, windowSize = 200,mapEnd = FALSE, minLeng
                 end = end(subject(pwa[wh])),
                 score = mys[wh],
                 matchLength = nchar(pwa)[wh],
-                pid = pid(pwa)[wh]
+                pid = pid(pwa)[wh],
+                match_seq_read = as.character(subject(pwa)[wh]),
+                match_seq_adapter = as.character(pattern(pwa)[wh])
                 )
             return(rv)
         } else {
@@ -49,7 +52,9 @@ map_adapter_pwa = function(fq,adapters, windowSize = 200,mapEnd = FALSE, minLeng
                 end = as.numeric(NA),
                 score = as.numeric(NA),
                 matchLength = as.numeric(NA),
-                pid = as.numeric(NA)
+                pid = as.numeric(NA),
+                match_seq_read = as.character(NA),
+                match_seq_adapter = as.character(NA)
                 ))
         }
     },mc.cores=ncpu)
