@@ -1,16 +1,21 @@
-match_adapter = function(myseqs, adapters,use.names=TRUE,avoidPartialMappingOnEnd=FALSE){
+match_adapter = function(myseqs, adapters,use.names=TRUE,
+        gapOpening=1, gapExtension=3, avoidPartialMappingOnEnd=FALSE){
     ## use.names -> use name of adapter instead of index
     ## loop over adapters
+    ## avoidPartialMappingOnEnd is highly experimental
     pwa_2_tibble = function(x) {
         tibble(
             start = start(pattern(x)),
             end = end(pattern(x)),
             group = 1:length(x),
             score = score(x),
-            match_length = nchar(x),
+            match_length = Biostrings::nchar(x),
             pid = pid(x),
             match_seq_read = as.character(pattern(x)),
-            match_seq_adapter = as.character(subject(x)))
+            match_seq_adapter = as.character(subject(x)),
+            aStart = start(subject(x)),
+            aEnd = end(subject(x))
+            )
     }
 
     ### avoid partial at the end by appending long enough N
@@ -25,7 +30,7 @@ match_adapter = function(myseqs, adapters,use.names=TRUE,avoidPartialMappingOnEn
 
     res = lapply(1:length(adapters), function(i) {
         pwa = pairwiseAlignment(sread(myseqs), adapters[[i]],patternQuality=PhredQuality(quality(myseqs)),
-              type="overlap", gapOpening=4,gapExtension=2)
+              type="overlap", gapOpening=gapOpening,gapExtension=gapExtension)
         ans = pwa_2_tibble(pwa)
         if(nrow(ans)>0) {ans$adapter_id = i}
         ans
