@@ -24,7 +24,7 @@ plot_length_dist = function(ss,main=""){
       theme_bw() + ggtitle(main) +  labs(x = "Read length in BP") +
       theme(axis.text.x = element_text(angle = 45,hjust = 1), plot.title = element_text(hjust = 0.5))+
       #geom_vline(xintercept = c(x.p25.log), color = "chocolate3", alpha = 1) +
-      geom_vline(xintercept = c(x.median.log), color = "firebrick", alpha = 1)
+      geom_vline(xintercept = c(x.median.log), color = "firebrick", alpha = 1) + xlim(c(lowEnd,highEnd))
       #geom_vline(xintercept = c(x.mean.log), color = "royalblue", alpha = 1) +
       #geom_vline(xintercept = c(x.p75.log), color = "chocolate3", alpha = 1) +
       # geom_text(x = x.p25.log, y = 200, label = paste("P25", round(x.p25.log, digits = 2), sep = '\n'), color = "chocolate3") +
