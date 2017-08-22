@@ -5,7 +5,7 @@ extract_seq_end = function(x,windowSize=200,fromEnd=FALSE){
         myend = width(x)
     } else {
         mystart = 1
-        myend = ifelse(windowSize>width(x),width(x),windowSize))
+        myend = ifelse(windowSize>width(x),width(x),windowSize)
     }
     narrow(x,mystart,myend)
 }
