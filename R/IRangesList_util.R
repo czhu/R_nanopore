@@ -7,7 +7,8 @@ IRangesList_2_tibble_psl = function(x) {
          allStart=mypaste(start),allEnd=mypaste(end),allWidth=mypaste(width))
 }
 
-tibble_psl_2_IRangesList = function(x, listLength = max(x$group)) {
+tibble_psl_2_IRangesList = function(x, listLength = nrow(x)) {
+    # x is a tibble or data frame containing start and end column, both are concatenated by ","
     myunlist = function(y) as.numeric(unlist(strsplit(y,",")))
 
     rv = vector("list", listLength)
