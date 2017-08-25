@@ -1,7 +1,3 @@
-#library(ggplot2)
-#library(ggExtra)
-#library(tidyverse)
-
 bivar_plot_heatscatter = function(x,y,log) {
     # commonTheme = list(labs(color="Density",fill="Density",
     #                      x="RNA-seq Expression",
@@ -36,7 +32,7 @@ bivar_plot_contour = function(x,y,addPoint=FALSE,log) {
     # https://stats.stackexchange.com/questions/31726/scatterplot-with-contour-heat-overlay
     df = tibble(x=x,y=y)
     p = ggplot(data=df,aes(x,y))  +
-      stat_density2d(aes(fill=..level..,alpha=..level..),geom='polygon',color=FALSE,contour=TRUE,bins=100) +
+      stat_density2d(aes(fill=..level..,alpha=..level..),geom='polygon',color=FALSE,contour=TRUE,bins=128) +
       scale_fill_continuous(high="#006400",low="#C0F5D0") + guides(fill="none",alpha="none") +
       theme_bw()
 
