@@ -21,7 +21,7 @@ bivar_plot_heatscatter = function(x,y,log) {
     ## heatscatter
     ## https://wresch.github.io/2012/11/06/ggplot2-smoothscatter.html
     ##
-    dens = densCols(x, y, colramp = colorRampPalette(LSD::colorpalette("heat",10)))
+    dens = densCols(x, y, colramp = colorRampPalette(LSD::colorpalette("heat",10)),nbin=512)
     df = tibble(x=x,y=y, dens=dens)
     p= ggplot(df, aes(x, y)) + geom_point(aes(col=dens),size = 1) + scale_color_identity() + theme_bw()
 

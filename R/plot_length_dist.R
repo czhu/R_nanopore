@@ -17,7 +17,7 @@ plot_length_dist = function(ss,main=""){
 
     ggplot(dd, aes(x=length)) +
       #geom_density(color="steelblue", fill="steelblue", alpha=0.8,na.rm=TRUE) +
-      geom_histogram(color="steelblue", fill="steelblue", alpha=0.8,na.rm=TRUE,bins=100) +
+      geom_histogram(color="steelblue", fill="steelblue", alpha=0.8,na.rm=TRUE,bins=500) +
       #stat_density(aes(y=..count..), color="steelblue", fill="steelblue", alpha=0.8,na.rm=TRUE, n=1000) +
       scale_x_continuous(breaks=breaks,trans="log10",limits=c(lowEnd,highEnd)) +
       #scale_y_continuous(breaks=c(0,125,250,375,500,625,750), expand=c(0,0)) +
