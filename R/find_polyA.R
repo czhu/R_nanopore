@@ -24,9 +24,9 @@ find_polyA = function(myseqs, n=12, max.mismatch=1L,hitBy="length",use.names=TRU
     if(hitBy=="length"){
         rv = res %>% group_by(group) %>% summarise(
             hit = which.max(width),
+            allStart=mypaste(start),allEnd=mypaste(end),allWidth=mypaste(width),
             start = start[hit],
             end = end[hit],
-            allStart=mypaste(start),allEnd=mypaste(end),allWidth=mypaste(width),
             allAdapter_id = mypaste(adapter_id),
             adapter_id = adapter_id[hit]
             )
@@ -34,9 +34,9 @@ find_polyA = function(myseqs, n=12, max.mismatch=1L,hitBy="length",use.names=TRU
         res$read_length = width(myseqs)[res$group]
         rv = res %>% group_by(group) %>% summarise(
             hit = which.min(pmin(start,read_length-end)),
+            allStart=mypaste(start),allEnd=mypaste(end),allWidth=mypaste(width),
             start = start[hit],
             end = end[hit],
-            allStart=mypaste(start),allEnd=mypaste(end),allWidth=mypaste(width),
             allAdapter_id = mypaste(adapter_id),
             adapter_id = adapter_id[hit]
             )
