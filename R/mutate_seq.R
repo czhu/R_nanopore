@@ -1,5 +1,7 @@
 ## mutate sequencing with given error probablity
 ## limitation, only 1 nt insertion allowed
+## vectorised version could be done using Biostrings::replaceAt
+## https://bioconductor.org/packages/release/bioc/vignettes/GenomicRanges/inst/doc/Ten_things_slides.pdf
 mutate_seq = function(x, substitutionRate= 0.07,insertionRate=0.03,deletionRate=0.05) {
     require(Biostrings)
 
