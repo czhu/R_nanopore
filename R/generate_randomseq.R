@@ -1,6 +1,5 @@
 generate_randomseq = function(n,l){
     ## n number of reads, l length of the read
-    require(Biostrings)
-    apply(matrix(sample(DNA_BASES, l * n, replace = TRUE),
-                   nrow = n), 1, paste, collapse = "")
+    mat = matrix(sample(Biostrings::DNA_BASES, l * n, replace = TRUE), nrow = n)
+    do.call(paste0,lapply(1:ncol(mat),function(i) mat[,i]))
 }
