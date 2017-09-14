@@ -166,7 +166,8 @@ gene_plot = function(plotDat, plotTxLabel=TRUE,doCDS = TRUE,debug=FALSE, drawSpa
                     gp=gpar(col="firebrick", lwd=1,alpha=0.5,lty=lineType),
                     default.units = "native")
             }
-            id(plotTxLabel) {grid.text(plotDat$param$trackNames[txIdx],y = unit(0.7, "npc"), gp=gpar(cex=0.4))}
+            if(plotTxLabel) {
+                grid.text(plotDat$param$trackNames[txIdx],y = unit(0.7, "npc"), gp=gpar(cex=0.4))}
 
             if(doCDS) {
                 myfeature=plotDat$cds[[txIdx]]
