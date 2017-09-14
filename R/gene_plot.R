@@ -216,13 +216,13 @@ gene_plot = function(plotDat, plotTxLabel=TRUE,doCDS = TRUE,debug=FALSE, drawSpa
                 myy = c(rep(yPerRead, sapply(myxStart,length)), rep(yPerRead, sapply(myxEnd,length)))
 
                 if(doLine & length(unlist(c(myxStart,myxEnd)))>0){
-                    #penaltyFactorReadNumber = log10(plotDat$param$trackHeight[txIdx])
+                    penaltyFactorReadNumber = (1/log10(plotDat$param$normCountMat[txIdx,vpCol]))^2
                     grid.polyline(
                         x=unlist(c(myxStart,myxEnd)), y=unit(myy+readHeightInPoint/2,"points"),
                         id = rep(1:length(unlist(myxStart)),2),
-                        gp=gpar(col=mycols, lwd=unit(min(1,readHeight/3),"points"),
+                        gp=gpar(col=mycols, lwd=unit(min(1,readHeight/3)*penaltyFactorReadNumber,"points"),
                         ## FIXME scale alpha depending on the number of reads
-                            alpha=0.2,lty=lineType), ##lex=1/penaltyFactorReadNumber),
+                            alpha=0.2*penaltyFactorReadNumber,lty=lineType), ##lex=1/penaltyFactorReadNumber),
                         default.units = "native")
                 }
                 if(debug)
