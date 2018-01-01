@@ -28,13 +28,13 @@ bivar_plot_heatscatter = function(x,y,log) {
     return(p)
 }
 
-bivar_plot_contour = function(x,y,addPoint=FALSE,log) {
+bivar_plot_contour = function(x,y,xlab="",ylab="",addPoint=FALSE,log) {
     # https://stats.stackexchange.com/questions/31726/scatterplot-with-contour-heat-overlay
     df = tibble(x=x,y=y)
     p = ggplot(data=df,aes(x,y))  +
       stat_density2d(aes(fill=..level..,alpha=..level..),geom='polygon',color=FALSE,contour=TRUE,bins=128) +
       scale_fill_continuous(high="#006400",low="#C0F5D0") + guides(fill="none",alpha="none") +
-      theme_bw()
+      theme_bw() + xlab(xlab) + ylab(ylab)
 
     if(addPoint) p = p +  geom_point(size=1,alpha=0.5)
     if(!missing(log)){
