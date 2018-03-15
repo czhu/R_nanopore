@@ -186,7 +186,14 @@ gene_plot = function(plotDat, plotTxLabel=TRUE,doCDS = TRUE,debug=FALSE, drawSpa
             if(plotDat$param$countMat[txIdx,vpCol]>0){
                 pushViewport(dataViewport(xData=coord, yscale=c(0,1), extension=0, clip="on",
                     layout.pos.col=1,layout.pos.row=which(names(VP)==paste0("data_",txIdx))))
-                myfeature= sort(grglist(plotDat$data[[vpCol]][[txIdx]], drop.D.ranges=FALSE))
+
+                if(class(plotDat$data[[vpCol]][[txIdx]]) == "GenomicRanges"){
+                ## reads as bed imported using rtracklayer it should have column blocks
+                    myfeature= sort( blocks(plotDat$data[[vpCol]][[txIdx]]) )
+                } else {   ## typically GAlignments class for backward compatibility
+                    myfeature= sort( grglist(plotDat$data[[vpCol]][[txIdx]], drop.D.ranges=FALSE) )
+                }
+
                 #eachReadSpace = min(2,convertY(unit(1,"npc"),"points",valueOnly=TRUE)/length(myfeature))
                 readHeightInPoint = readHeight - spaceBetweenReadsInPoint
                 myx = unlist(end(myfeature))
