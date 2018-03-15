@@ -51,7 +51,7 @@ num_to_color = function(x,from=range(x),to=c(0.2,0.8), cols=RColorBrewer::brewer
 simplify_num_output = function(x){sprintf("%.01f",x)}
 
 gene_plot = function(plotDat, plotTxLabel=TRUE,doCDS = TRUE,debug=FALSE, drawSpaceBetweenReads = TRUE,
-    drawPanelRect = TRUE, drawReadCol = TRUE, drawReadBorder = FALSE,
+    drawPanelRect = TRUE, drawReadCol = TRUE, drawReadBorder = FALSE, lineAlpha=0.2,lineWidth,
     doLine=TRUE, lineType= "dotted" ){
     ## default settings
     ## shall we draw CDS
@@ -217,13 +217,15 @@ gene_plot = function(plotDat, plotTxLabel=TRUE,doCDS = TRUE,debug=FALSE, drawSpa
                 myy = c(rep(yPerRead, sapply(myxStart,length)), rep(yPerRead, sapply(myxEnd,length)))
 
                 if(doLine & length(unlist(c(myxStart,myxEnd)))>0){
-                    penaltyFactorReadNumber = (1/log10(plotDat$param$normCountMat[txIdx,vpCol]))^2
+                    #penaltyFactorReadNumber = (1/log10(plotDat$param$normCountMat[txIdx,vpCol]))^2
                     grid.polyline(
                         x=unlist(c(myxStart,myxEnd)), y=unit(myy+readHeightInPoint/2,"points"),
                         id = rep(1:length(unlist(myxStart)),2),
-                        gp=gpar(col=mycols, lwd=unit(min(1,readHeight/3)*penaltyFactorReadNumber,"points"),
+                        gp=gpar(col=mycols,
+                            lwd=if(missing(lineWidth)) unit(min(1,readHeight/10),"points") else {
+                            unit(lineWidth,"points")},
                         ## FIXME scale alpha depending on the number of reads
-                            alpha=0.2*penaltyFactorReadNumber,lty=lineType), ##lex=1/penaltyFactorReadNumber),
+                            alpha=lineAlpha,lty=lineType), ##lex=1/penaltyFactorReadNumber),
                         default.units = "native")
                 }
                 if(debug)
