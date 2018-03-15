@@ -48,7 +48,7 @@ trim_adapter = function(infile, adapters, outfolder="workspace",ncpu=20,readsChu
     fs= FastqStreamer(infile,n=readsChunkSize)
     if(saveLog) {
         sink(file=file(processlogFile, open = "wt"),type="message")
-    }    
+    }
     while (length(fq <- yield(fs))) {
         message("Processing ", length(fq)," Reads starting at read ", nRead+1)
         ##################
