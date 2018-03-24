@@ -1,8 +1,8 @@
 Package: nanopore
 Type: Package
 Title: Analysing Nanopore RNA-seq data
-Version: 0.05
-Date: 2017-09-13
+Version: 0.08
+Date: 2018-03-23
 Author: Chenchen Zhu
 Maintainer: Chenchen Zhu <czhu@embl.de>
 Description: QC, adapter trimming, visualizing of Nanopore sequencing data
