@@ -37,12 +37,11 @@ plot_coord = function(coord, vpr) {
 
 ### this is core plotting function for plotting granges with exons (in blocks slot)
 ### FIXME: x could be GenomicRangesList, where each element in a list is a exon, this would be more general
-
-plot_feature  = function(x, vpr, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10,
+plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10,
     doLine=TRUE, lineAlpha=0.5, lineType= "dotted", plotBottomToTop  = FALSE, plotNames,
     drawSpaceBetweenReads=TRUE, center=FALSE) {
-    ## key function used to plot read and tx annotation
     ## x is a GRanges object with blocks
+    ## conivence functon to call plot_feature with vpr
     if(missing(vpr)) {
         vpr = new_vp()
     }
@@ -52,6 +51,21 @@ plot_feature  = function(x, vpr, coord, lineWidth, featureCols="steelblue", feat
     pushViewport(
         dataViewport(xData=coord, yscale=c(0,1), extension=0, clip="on",
         layout.pos.col=1,layout.pos.row=vpr))
+    plot_feature(x, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10,
+            doLine=TRUE, lineAlpha=0.5, lineType= "dotted", plotBottomToTop  = FALSE, plotNames,
+            drawSpaceBetweenReads=TRUE, center=FALSE)
+    popViewport()
+}
+
+
+plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10,
+    doLine=TRUE, lineAlpha=0.5, lineType= "dotted", plotBottomToTop  = FALSE, plotNames,
+    drawSpaceBetweenReads=TRUE, center=FALSE) {
+    ## key function used to plot read and tx annotation
+    ## x is a GRanges object with blocks
+    if(missing(coord)) {
+        coord = c(min(start(x)), max(end(x)))
+    }
 
     thisMaxHeight = convertY(unit(1,"npc"),"points",valueOnly=TRUE)
 
@@ -68,10 +82,10 @@ plot_feature  = function(x, vpr, coord, lineWidth, featureCols="steelblue", feat
     myx = unlist(start(myfeature))
 
     ## for - strand stack top to bottom, for + strand bottom to top
-    if(plotBottomToTop){
+    if(plotBottomToTop){### usually for "+" strand
         yPerRead = (mybins-1) * featureHeight
         if(center) yPerRead = yPerRead + marginSpace/2
-        } else{
+    } else{ ## usually for "-" strand
         yPerRead = thisMaxHeight - mybins * featureHeight
         if(center) yPerRead = yPerRead - marginSpace/2
     }
@@ -117,6 +131,5 @@ plot_feature  = function(x, vpr, coord, lineWidth, featureCols="steelblue", feat
             x = unit((start(x) + end(x))/2,"native"),
             y = unit(thisy, "npc"),gp=gpar(cex=0.4))
     }
-    popViewport()
-    #############
+
 }
