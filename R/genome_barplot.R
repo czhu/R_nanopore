@@ -1,3 +1,4 @@
+## genome_barplot for plotting shortread coverage
 genome_barplot = function(x, coord, vpr, trsf=identity,col="darkgreen",alpha=1,lwd=1){
     ### x is data.frame or tibble in the format of bedGraph
     ### i.e chr, start, end, value,
