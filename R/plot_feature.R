@@ -51,9 +51,10 @@ plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", 
     pushViewport(
         dataViewport(xData=coord, yscale=c(0,1), extension=0, clip="on",
         layout.pos.col=1,layout.pos.row=vpr))
-    plot_feature(x, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10,
-            doLine=TRUE, lineAlpha=0.5, lineType= "dotted", plotBottomToTop  = FALSE, plotNames,
-            drawSpaceBetweenReads=TRUE, center=FALSE)
+    plot_feature(x=x, coord=coord, lineWidth=lineWidth,
+            featureCols=featureCols, featureAlpha=featureAlpha, featureHeight=featureHeight,
+            doLine=doLine, lineAlpha=lineAlpha, lineType= lineType, plotBottomToTop  = plotBottomToTop, plotNames,
+            drawSpaceBetweenReads=drawSpaceBetweenReads, center=center)
     popViewport()
 }
 
