@@ -58,6 +58,19 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
         spacePerDataTrack["Data_plus"], spacePerAnnotTrack["Annot_plus"],
         "axis"=genomeAxisHeight, spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
 
+    ######### plot title
+    mytitle=plotDat$name
+    doTitle = !is.null(mytitle)
+    if(doTitle){
+        titleVerticalHeight = unit(2,"line")
+        pushViewport(viewport(x=0,y=1,width=1,height=titleVerticalHeight,just=c("left","top")))
+        grid.text(mytitle)
+        popViewport()
+        pushViewport(viewport(x=0,y=unit(1,"npc")-titleVerticalHeight,
+            width=1,height=unit(1,"npc")-titleVerticalHeight, just=c("left","top")))
+    }
+    ##########
+
     grl=grid.layout(length(VP), 1, heights=unit(VP,"points"))
     pushViewport(viewport(layout=grl))
     #grid.show.layout(glo,newpage=FALSE)
@@ -191,4 +204,5 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
         }
     }
     popViewport()
+    if(doTitle) popViewport()
 }
