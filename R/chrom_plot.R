@@ -18,7 +18,8 @@ validate_plotdat = function(x){
     return( all(names(x$consensus) == names(x$reads)) )
 }
 
-chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3, spaceBetweenCluster = 5, debug = TRUE){
+chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3, spaceBetweenCluster = 5, debug = TRUE,
+    doConsensus=TRUE){
     # x is plot data
     # plotDat = list(
     #     consensus = thisCluster, this should contian count
@@ -141,23 +142,63 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                         thisCluster = subconsensusFeatureWithinEU[clusterIndex]
 
                         thisReads = plotDat$reads[[names(thisCluster)]]
-
+                        thisx = unit(start(thisCluster),"native")
+                        thisy = unit(
+                            if(thisStrd=="-"){
+                                thisSpaceHeight- trackHeightShift[trackIndex]
+                            } else {
+                                if( trackIndex==1 ) {spaceBetweenCluster} else {
+                                    trackHeightShift[trackIndex-1]+spaceBetweenCluster
+                                }
+                            },"points")
+                        thisHeight = unit(ct_to_drawPoint(thisCluster$count),"points")
                         pushViewport(
                             viewport(
-                            x=unit(start(thisCluster),"native"),
-                            width=unit(width(thisCluster),"native"),
+                            x = thisx, y = thisy,
+                            width = unit(width(thisCluster),"native"),
                             clip="off",just=c("left","bottom"),
-                            y = unit(
-                                if(thisStrd=="-"){
-                                thisSpaceHeight- trackHeightShift[trackIndex]} else {
-                                    if(trackIndex==1) {spaceBetweenCluster} else {
-                                        trackHeightShift[trackIndex-1]+spaceBetweenCluster
-                                    }
-                                },"points"),
                             xscale=c(start(thisCluster),end(thisCluster)),
-                            height=unit(ct_to_drawPoint(thisCluster$count),"points")
+                            height=thisHeight
                             )
                         )
+                        if(doConsensus){
+                            featureHeightConsensus = unit(5,"points")
+                            if(thisStrd=="+"){
+                                newy1 = 0
+                                newy2 = featureHeightConsensus
+                            } else{
+                                newy1 = unit(round(convertY(unit(1,"npc"),"points",valueOnly=TRUE) - as.integer(featureHeightConsensus)),"points")
+                                newy2 = 0
+                            }
+                            # message(thisStrd,"\t",convertY(thisHeight-featureHeightConsensus,"points",valueOnly=TRUE),
+                            #     "\t",convertY(unit(1,"npc"),"points",valueOnly=TRUE),"\t", as.integer(newy1))
+                            pushViewport(
+                                viewport(
+                                x = thisx,
+                                y = newy1,
+                                width = unit(width(thisCluster),"native"),
+                                clip="off",just=c("left","bottom"),
+                                xscale=c(start(thisCluster),end(thisCluster)),
+                                height= featureHeightConsensus
+                                ))
+                            plot_feature(thisCluster,
+                                featureCols=ifelse(is.null(thisCluster$itemRgb),"black", thisCluster$itemRgb),
+                                    featureHeight=as.integer(featureHeightConsensus),
+                                    doLine=TRUE,lineAlpha=1,lineType= "dotted",
+                                    plotBottomToTop = ifelse(thisStrd=="+",TRUE,FALSE),
+                                    center=TRUE)
+                            popViewport()
+                            pushViewport(
+                                viewport(
+                                x= thisx,
+                                y = newy2,
+                                width = unit(width(thisCluster),"native"),
+                                clip="off",just=c("left","bottom"),
+                                xscale=c(start(thisCluster),end(thisCluster)),
+                                height = thisHeight - featureHeightConsensus
+                                )
+                            )
+                        }
                         thisMaxHeight = convertY(unit(1,"npc"),"points",valueOnly=TRUE)
                         nReadsToPlot = floor(thisMaxHeight/featureHeightPerRead)
                         nReadsToPlot = ifelse(nReadsToPlot> length(thisReads), length(thisReads), nReadsToPlot)
@@ -170,7 +211,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                             doLine=TRUE,lineAlpha=1,lineType= "dotted",
                             plotBottomToTop = ifelse(thisStrd=="+",TRUE,FALSE),
                             center=TRUE)
-
+                        if(doConsensus) popViewport()
 
                         if(plotCountNum){
                             s = as.character(thisCluster$count)
