@@ -39,7 +39,7 @@ plot_coord = function(coord, vpr) {
 ### FIXME: x could be GenomicRangesList, where each element in a list is a exon, this would be more general
 plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10,
     doLine=TRUE, lineAlpha=0.5, lineType= "dotted", plotBottomToTop  = FALSE, plotNames,
-    drawSpaceBetweenReads=TRUE, center=FALSE) {
+    spaceBetweenFeatures, center=FALSE) {
     ## x is a GRanges object with blocks
     ## conivence functon to call plot_feature with vpr
     if(missing(vpr)) {
@@ -53,15 +53,15 @@ plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", 
         layout.pos.col=1,layout.pos.row=vpr))
     plot_feature(x=x, coord=coord, lineWidth=lineWidth,
             featureCols=featureCols, featureAlpha=featureAlpha, featureHeight=featureHeight,
-            doLine=doLine, lineAlpha=lineAlpha, lineType= lineType, plotBottomToTop  = plotBottomToTop, plotNames,
-            drawSpaceBetweenReads=drawSpaceBetweenReads, center=center)
+            doLine=doLine, lineAlpha=lineAlpha, lineType= lineType, plotBottomToTop  = plotBottomToTop,
+            plotNames=plotNames,spaceBetweenFeatures=spaceBetweenFeatures, center=center)
     popViewport()
 }
 
 
 plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10,
     doLine=TRUE, lineAlpha=0.5, lineType= "dotted", plotBottomToTop  = FALSE, plotNames,
-    drawSpaceBetweenReads=TRUE, center=FALSE) {
+    spaceBetweenFeatures, center=FALSE) {
     ## key function used to plot read and tx annotation
     ## x is a GRanges object with blocks
     ## plotBottomToTop TRUE for "+" strand FALSE for minus strand
@@ -78,14 +78,13 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
     ### avoid read overflow i.e. drawing space cannot acommodate this many feature given the size
     featureHeight = min(featureHeight, thisMaxHeight/ nfeature)
 
-    if(is.numeric(drawSpaceBetweenReads)){
+    if(!missing(spaceBetweenFeatures)){
         ## space cannot exceed featureHeight
-        spaceBetweenReadsInPoint=  drawSpaceBetweenReads
+        spaceBetweenReadsInPoint=  spaceBetweenFeatures
         featureHeightInPoint = featureHeight
         featureHeight = featureHeightInPoint + spaceBetweenReadsInPoint
-        message("Plotting with space ", drawSpaceBetweenReads)
     } else{
-        spaceBetweenReadsInPoint = ifelse(drawSpaceBetweenReads,featureHeight/8,0)
+        spaceBetweenReadsInPoint = featureHeight/8
         featureHeightInPoint = featureHeight - spaceBetweenReadsInPoint
     }
 
