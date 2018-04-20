@@ -1,4 +1,5 @@
-mylog = function(x) log2(x+1)
+#mylog = function(x) log2(x+1)
+mylog = function(x) log(x+1,1.5)
 
 trsf_ct_nread = function(x) {
     ### transform count to
@@ -30,7 +31,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     ## a few plot paramter
     myannot = plotDat$geneModel
 
-    genomeAxisHeight = 15
+    genomeAxisHeight = 10
 
     extendLeft = 250 ## in bp
     extendRight = 250
@@ -39,7 +40,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
         trsf_ct_nread(x)*featureHeightPerRead*2
     }
 
-    spacePerAnnotTrack = rep(10,2)
+    spacePerAnnotTrack = rep(6,2)
     names(spacePerAnnotTrack) = c("Annot_plus","Annot_minus")
 
     ## height of the page
@@ -54,10 +55,17 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     #     spacePerDataTrack["Data_plus"], spacePerAnnotTrack["Annot_plus"],"coverage"=10,
     #     "axis"=genomeAxisHeight,"ie"=5,"ei"=5,
     #     spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
-
-    VP = c(
-        spacePerDataTrack["Data_plus"], spacePerAnnotTrack["Annot_plus"],
-        "axis"=genomeAxisHeight, spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
+    doHighlightGene = !is.null(plotDat$gene)
+    if(doHighlightGene) {
+        mygenes = plotDat$gene
+        VP = c(
+            spacePerDataTrack["Data_plus"], spacePerAnnotTrack["Annot_plus"], Gene_plus = 5,
+            "axis"=genomeAxisHeight, Gene_minus = 5, spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
+    } else {
+        VP = c(
+            spacePerDataTrack["Data_plus"], spacePerAnnotTrack["Annot_plus"],
+            "axis"=genomeAxisHeight, spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
+    }
 
     ######### plot title
     mytitle=plotDat$name
@@ -93,13 +101,24 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     #     vpr = which(names(VP)=="ie"),col="saddlebrown",trsf=log2,lwd=0.25)
 
     ## annotation track
+    if(doHighlightGene){
+        if(any(strand(mygenes)=="+")) {
+            plot_feature_vpr(mygenes[strand(mygenes)=="+"],vpr=which(names(VP)=="Gene_plus"),coord=coord,
+            featureHeight=0.5, plotBottomToTop=TRUE, featureCols="black",doLine=FALSE,center=TRUE,spaceBetweenFeatures=1)
+        }
+        if(any(strand(mygenes)=="-")) {
+            plot_feature_vpr(mygenes[strand(mygenes)=="-"],vpr=which(names(VP)=="Gene_minus"),coord=coord,
+            featureHeight=0.5, plotBottomToTop=FALSE,featureCols="black",doLine=FALSE, center=TRUE,spaceBetweenFeatures=1)
+        }
+    }
+
     if(any(strand(myannot)=="+")) {
         plot_feature_vpr(plotDat$geneModel[strand(plotDat$geneModel)=="+"],vpr=which(names(VP)=="Annot_plus"),coord=coord,
-        featureHeight=5, plotBottomToTop=TRUE, featureCols="firebrick",doLine=FALSE,center=TRUE)
+        featureHeight=3, plotBottomToTop=TRUE, featureCols="firebrick",doLine=FALSE,center=TRUE)
     }
     if(any(strand(myannot)=="-")) {
         plot_feature_vpr(plotDat$geneModel[strand(plotDat$geneModel)=="-"],vpr=which(names(VP)=="Annot_minus"),coord=coord,
-        featureHeight=5, plotBottomToTop=FALSE,featureCols="firebrick",doLine=FALSE, center=TRUE)
+        featureHeight=3, plotBottomToTop=FALSE,featureCols="firebrick",doLine=FALSE, center=TRUE)
     }
 
     ## draw data track
