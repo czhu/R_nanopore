@@ -49,7 +49,7 @@ plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", 
         coord = c(min(start(x)), max(end(x)))
     }
     pushViewport(
-        dataViewport(xData=coord, yscale=c(0,1), extension=0, clip="on",
+        dataViewport(xData=coord, yscale=c(0,1), extension=0, clip="off",
         layout.pos.col=1,layout.pos.row=vpr))
     plot_feature(x=x, coord=coord, lineWidth=lineWidth,
             featureCols=featureCols, featureAlpha=featureAlpha, featureHeight=featureHeight,
@@ -64,6 +64,7 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
     drawSpaceBetweenReads=TRUE, center=FALSE) {
     ## key function used to plot read and tx annotation
     ## x is a GRanges object with blocks
+    ## plotBottomToTop TRUE for "+" strand FALSE for minus strand
     if(missing(coord)) {
         coord = c(min(start(x)), max(end(x)))
     }
@@ -76,8 +77,17 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
 
     ### avoid read overflow i.e. drawing space cannot acommodate this many feature given the size
     featureHeight = min(featureHeight, thisMaxHeight/ nfeature)
-    spaceBetweenReadsInPoint= ifelse(drawSpaceBetweenReads,featureHeight/8,0)
-    featureHeightInPoint = featureHeight - spaceBetweenReadsInPoint
+
+    if(is.numeric(drawSpaceBetweenReads)){
+        ## space cannot exceed featureHeight
+        spaceBetweenReadsInPoint=  drawSpaceBetweenReads
+        featureHeightInPoint = featureHeight
+        featureHeight = featureHeightInPoint + spaceBetweenReadsInPoint
+        message("Plotting with space ", drawSpaceBetweenReads)
+    } else{
+        spaceBetweenReadsInPoint = ifelse(drawSpaceBetweenReads,featureHeight/8,0)
+        featureHeightInPoint = featureHeight - spaceBetweenReadsInPoint
+    }
 
     myfeature = blocks(x)
     myx = unlist(start(myfeature))
@@ -122,7 +132,7 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
     }
     if(!missing(plotNames)){
         nTrack = max(mybins)
-        if(mystrand=="+") {
+        if(plotBottomToTop) {
             thisy = mybins * (1/nTrack) + 1/nTrack/2
         } else {
             thisy = 1 - mybins * (1/nTrack)  + 1/nTrack/2
