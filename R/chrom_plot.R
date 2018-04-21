@@ -30,7 +30,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     stopifnot(validate_plotdat(plotDat))
     ## a few plot paramter
     myannot = plotDat$geneModel
-
+    doHighlight = !is.null(plotDat$highlight)
     genomeAxisHeight = 10
 
     extendLeft = 250 ## in bp
@@ -159,7 +159,6 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                     thisBin = as.integer(names(countPerTrack)[trackIndex])
                     for(clusterIndex in which(mybins == thisBin)) {
                         thisCluster = subconsensusFeatureWithinEU[clusterIndex]
-
                         thisReads = plotDat$reads[[names(thisCluster)]]
                         thisx = unit(start(thisCluster),"native")
                         thisy = unit(
@@ -206,6 +205,31 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                     doLine=TRUE,lineAlpha=1,lineType= "dotted",
                                     plotBottomToTop = ifelse(thisStrd=="+",TRUE,FALSE),
                                     center=TRUE)
+                            if(doHighlight){
+                                ## loop because thisCluster could have multiple hits
+                                for(thisName in names(thisCluster)){
+                                    wh = which(names(plotDat$consensus) == thisName)
+                                    if(!is.null(plotDat$highlight[[wh]])){
+                                        grid.text(plotDat$highlight[[wh]]$shape,
+                                            x= unit(convertX(unit(start(plotDat$consensus[wh]) - extendLeft,"native"),"npc",
+                                                valueOnly=TRUE)-convertX(unit(1,"strwidth","s"),"npc",valueOnly=TRUE),"npc"),
+                                            0.5,just=c("left","center"),gp=gpar(fontsize=4))
+                                        if(!is.null(plotDat$highlight[[wh]]$highlight)){
+                                            thisStart = start(plotDat$highlight[[wh]]$highlight)
+                                            thisEnd = end(plotDat$highlight[[wh]]$highlight)
+                                            plot_feature(plotDat$highlight[[wh]]$highlight,
+                                                featureCols="gray4",
+                                                    featureHeight=as.integer(featureHeightConsensus)-2,
+                                                    doLine=FALSE,featureAlpha=0.5,
+                                                    plotBottomToTop = ifelse(thisStrd=="+",TRUE,FALSE),
+                                                    center=TRUE)
+                                            grid.text(plotDat$highlight[[wh]]$highlight$shape,
+                                                x = convertX(unit((thisStart+thisEnd)/2,"native"),"npc"),
+                                                y=0.5,just="center",gp=gpar(fontsize=4))
+                                        }
+                                    }
+                                }
+                            }
                             popViewport()
                             pushViewport(
                                 viewport(
