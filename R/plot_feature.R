@@ -143,3 +143,46 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
     }
 
 }
+
+# x = IRanges(start=c(10,40,20),end=c(20,50,80))
+# mytext = c("a","b","c")
+# pushViewport(viewport(width=0.5,height=0.5))
+# pushViewport(dataViewport(xData=c(10,100), yscale=c(0,1), extension=0, clip="off"))
+# grid.rect()
+# plot_feature_text(x,mytext,fontsize=20,debug=TRUE,plotBottomToTop=FALSE)
+
+plot_feature_text = function(x,text,fontsize=12,side=0, col="black",xjust=unit(0,"npc"), yjust=y(0,"npc"),
+    plotBottomToTop=TRUE,debug=FALSE){
+    ## side: 0 center,1, left, 2,top 3,right 4 bottom
+    ## xjust, yjust, shift in x or y if defined, currently ignored
+    ## textSize: text height in points
+    mybins = disjointBins(x)
+    featureHeight = fontsize
+    if(side!=0) stop("side other than center has not been implemented")
+    myx = start(x)
+
+    ## for - strand stack top to bottom, for + strand bottom to top
+    myy = if(plotBottomToTop){### usually for "+" strand
+         (mybins-1) * featureHeight}
+         else { ## usually for "-" strand
+        convertY(unit(1,"npc"),"points",valueOnly=TRUE) - mybins * featureHeight}
+
+    grid.rect(myx, unit(myy,"points"), width=width(x),
+        height=unit(featureHeight,"points"), gp=gpar(col = ifelse(debug,"black",NA) , fill = NA),
+        default.units="native", just=c("left","bottom"))
+    ## for side other than 0 play with 1 strwidth and strheight
+    ## use signif to make sure there are not too many digits after converting from npc to points
+    if(side==0){
+        xtext = (start(x) + end(x))/2
+        ytext = myy + featureHeight/2
+    } else if (side == 1) {
+        ## substrct 1 strwidth
+        xtext = (start(x) + end(x))/2
+        ytext = myy + featureHeight/2
+    } else if (side == 2) {
+        xtext = (start(x) + end(x))/2
+        #ytext = myy + featureHeight*1.5
+    }
+
+    grid.text(text, x =unit(xtext,"native"), y = unit(ytext,"points"),just="center", gp = gpar(col=col,fontsize=fontsize))
+}
