@@ -150,7 +150,6 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
 # pushViewport(dataViewport(xData=c(10,100), yscale=c(0,1), extension=0, clip="off"))
 # grid.rect()
 # plot_feature_text(x,mytext,fontsize=20,debug=TRUE,plotBottomToTop=FALSE)
-
 plot_feature_text = function(x,text,fontsize=12,side=0, col="black",xjust=unit(0,"npc"), yjust=y(0,"npc"),
     plotBottomToTop=TRUE,debug=FALSE){
     ## side: 0 center,1, left, 2,top 3,right 4 bottom
