@@ -57,10 +57,11 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     #     spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
     doHighlightGene = !is.null(plotDat$gene)
     if(doHighlightGene) {
-        mygenes = plotDat$gene
+        #mygenes = plotDat$gene
         VP = c(
-            spacePerDataTrack["Data_plus"], spacePerAnnotTrack["Annot_plus"], Gene_plus = 5,
-            "axis"=genomeAxisHeight, Gene_minus = 5, spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
+            spacePerDataTrack["Data_plus"], spacePerAnnotTrack["Annot_plus"], Gene_name_plus=5, Gene_plus = 5,
+            "axis"=genomeAxisHeight, Gene_minus = 5, Gene_name_minus =5,
+            spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
     } else {
         VP = c(
             spacePerDataTrack["Data_plus"], spacePerAnnotTrack["Annot_plus"],
@@ -80,7 +81,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     }
     ##########
 
-    grl=grid.layout(length(VP), 1, heights=unit(VP,"points"))
+    grl = grid.layout(length(VP), 1, heights=unit(VP,"points"))
     pushViewport(viewport(layout=grl))
     #grid.show.layout(glo,newpage=FALSE)
     if(debug) sapply(1:length(VP),draw_rect)
@@ -103,12 +104,22 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     ## annotation track
     if(doHighlightGene){
         if(any(strand(mygenes)=="+")) {
-            plot_feature_vpr(mygenes[strand(mygenes)=="+"],vpr=which(names(VP)=="Gene_plus"),coord=coord,
+            isThiStrd = as.logical(strand(plotDat$gene)=="+")
+            plot_feature_vpr(plotDat$gene[isThiStrd],vpr=which(names(VP)=="Gene_plus"),coord=coord,
             featureHeight=0.5, plotBottomToTop=TRUE, featureCols="black",doLine=FALSE,center=TRUE,spaceBetweenFeatures=1)
+            plot_feature_text_vpr(plotDat$gene[isThiStrd],
+                plotDat$gene$name[isThiStrd], vpr=which(names(VP)=="Gene_name_plus"),
+                coord, fontsize=4,side=0, col="black",xjust=unit(0,"npc"), yjust=y(0,"npc"),
+                plotBottomToTop=TRUE,debug=FALSE)
         }
         if(any(strand(mygenes)=="-")) {
-            plot_feature_vpr(mygenes[strand(mygenes)=="-"],vpr=which(names(VP)=="Gene_minus"),coord=coord,
+            isThiStrd = as.logical(strand(plotDat$gene)=="-")
+            plot_feature_vpr(plotDat$gene[isThiStrd],vpr=which(names(VP)=="Gene_minus"),coord=coord,
             featureHeight=0.5, plotBottomToTop=FALSE,featureCols="black",doLine=FALSE, center=TRUE,spaceBetweenFeatures=1)
+            plot_feature_text_vpr(plotDat$gene[isThiStrd],
+                plotDat$gene$name[isThiStrd], vpr=which(names(VP)=="Gene_name_minus"),
+                coord, fontsize=4,side=0, col="black",xjust=unit(0,"npc"), yjust=y(0,"npc"),
+                plotBottomToTop=FALSE,debug=FALSE)
         }
     }
 
@@ -225,7 +236,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                                     center=TRUE)
                                             grid.text(plotDat$highlight[[wh]]$highlight$shape,
                                                 x = convertX(unit((thisStart+thisEnd)/2,"native"),"npc"),
-                                                y=0.5,just="center",gp=gpar(fontsize=4))
+                                                y=0.9,just="center",gp=gpar(fontsize=4))
                                         }
                                     }
                                 }
