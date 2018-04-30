@@ -185,3 +185,21 @@ plot_feature_text = function(x,text,fontsize=12,side=0, col="black",xjust=unit(0
 
     grid.text(text, x =unit(xtext,"native"), y = unit(ytext,"points"),just="center", gp = gpar(col=col,fontsize=fontsize))
 }
+
+plot_feature_text_vpr  = function(x, text, vpr,coord, fontsize=12,side=0, col="black",xjust=unit(0,"npc"), yjust=y(0,"npc"),
+    plotBottomToTop=TRUE,debug=FALSE) {
+    ## x is a GRanges object with blocks
+    ## conivence functon to call plot_feature with vpr
+    if(missing(vpr)) {
+        vpr = new_vp()
+    }
+    if(missing(coord)) {
+        coord = c(min(start(x)), max(end(x)))
+    }
+    pushViewport(
+        dataViewport(xData=coord, yscale=c(0,1), extension=0, clip="off",
+        layout.pos.col=1,layout.pos.row=vpr))
+    plot_feature_text(x=x,text=text,fontsize=fontsize,side=side, col=col,xjust=xjust, yjust=yjust,
+            plotBottomToTop=plotBottomToTop,debug=debug)
+    popViewport()
+}
