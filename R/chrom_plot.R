@@ -102,8 +102,8 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     #     vpr = which(names(VP)=="ie"),col="saddlebrown",trsf=log2,lwd=0.25)
 
     ## annotation track
-    if(doHighlightGene){
-        if(any(strand(mygenes)=="+")) {
+    if(doHighlightGene & length(plotDat$gene)>0){
+        if(any(strand(plotDat$gene)=="+")) {
             isThiStrd = as.logical(strand(plotDat$gene)=="+")
             plot_feature_vpr(plotDat$gene[isThiStrd],vpr=which(names(VP)=="Gene_plus"),coord=coord,
             featureHeight=0.5, plotBottomToTop=TRUE, featureCols="black",doLine=FALSE,center=TRUE,spaceBetweenFeatures=1)
@@ -112,7 +112,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                 coord, fontsize=4,side=0, col="black",xjust=unit(0,"npc"), yjust=y(0,"npc"),
                 plotBottomToTop=TRUE,debug=FALSE)
         }
-        if(any(strand(mygenes)=="-")) {
+        if(any(strand(plotDat$gene)=="-")) {
             isThiStrd = as.logical(strand(plotDat$gene)=="-")
             plot_feature_vpr(plotDat$gene[isThiStrd],vpr=which(names(VP)=="Gene_minus"),coord=coord,
             featureHeight=0.5, plotBottomToTop=FALSE,featureCols="black",doLine=FALSE, center=TRUE,spaceBetweenFeatures=1)
