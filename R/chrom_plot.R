@@ -33,8 +33,8 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     doHighlight = !is.null(plotDat$highlight)
     genomeAxisHeight = 10
 
-    extendLeft = 250 ## in bp
-    extendRight = 250
+    extendLeft = 200 ## in bp
+    extendRight = 200
 
     ct_to_drawPoint  = function(x){
         trsf_ct_nread(x)*featureHeightPerRead*2
