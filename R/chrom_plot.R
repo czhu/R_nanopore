@@ -37,7 +37,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
         config = list(
             # geneModelColor = "lavenderblush3",
             # geneModelReducedColor = "lemonchiffon3"
-            geneModelColor = "#891A1A",
+            geneModelColor = "#B22222",
             geneModelReducedColor = "#EF2D2D"
         )
     }
