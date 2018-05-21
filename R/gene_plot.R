@@ -1,5 +1,7 @@
 ### for plot clustered read with consensus of annotation
 ### a complete rewrite
+## TODO: adust feature and geneModel for number of reads
+
 gene_plot = function(plotDat, title, plotTxLabel=TRUE,
     debug=FALSE,
     drawPanelRect = TRUE, drawReadCol = TRUE, drawReadBorder = FALSE, lineAlpha=0.2,lineWidth,
@@ -74,7 +76,7 @@ gene_plot = function(plotDat, title, plotTxLabel=TRUE,
 
         plot_feature_vpr(plotDat$consensus[ithCluster],
             vpr=which(names(VP)==paste0("annot_",ithCluster)), coord = coord,
-            featureHeight = 4, featureAlpha = 0.9, doLine=TRUE, featureCols =
+            featureHeight = 4, featureAlpha = 0.8, doLine=TRUE, featureCols =
             if(is.null(plotDat$consensus[ithCluster]$itemRgb)){"firebrick"} else {plotDat$consensus[ithCluster]$itemRgb},
             lineAlpha=0.5, lineType= "dotted",spaceBetweenFeatures=0,plotBottomToTop=FALSE, center=TRUE)
         plot_feature_vpr(plotDat$reads[[ithCluster]],
