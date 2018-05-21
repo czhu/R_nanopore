@@ -51,7 +51,7 @@ num_to_color = function(x,from=range(x),to=c(0.2,0.8), cols=RColorBrewer::brewer
 simplify_num_output = function(x){sprintf("%.01f",x)}
 
 ### an very ancient implementation should be removed at some point
-gene_plot_defunct = function(plotDat, plotTxLabel=TRUE,doCDS = TRUE,debug=FALSE, drawSpaceBetweenReads = TRUE,
+compare_plot = function(plotDat, plotTxLabel=TRUE,doCDS = TRUE,debug=FALSE, drawSpaceBetweenReads = TRUE,
     drawPanelRect = TRUE, drawReadCol = TRUE, drawReadBorder = FALSE, lineAlpha=0.2,lineWidth,
     doLine=TRUE, lineType= "dotted" ){
     ## default settings
