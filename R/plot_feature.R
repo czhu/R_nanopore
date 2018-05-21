@@ -39,7 +39,7 @@ plot_coord = function(coord, vpr) {
 ### FIXME: x could be GenomicRangesList, where each element in a list is a exon, this would be more general
 plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10,
     doLine=TRUE, lineAlpha=0.5, lineType= "dotted", plotBottomToTop  = FALSE, plotNames,
-    spaceBetweenFeatures, center=FALSE,textLabelFront) {
+    spaceBetweenFeatures, center=FALSE,textLabelFront,keepOrder=FALSE) {
     ## x is a GRanges object with blocks
     ## conivence functon to call plot_feature with vpr
     if(missing(vpr)) {
@@ -54,7 +54,7 @@ plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", 
     plot_feature(x=x, coord=coord, lineWidth=lineWidth,
             featureCols=featureCols, featureAlpha=featureAlpha, featureHeight=featureHeight,
             doLine=doLine, lineAlpha=lineAlpha, lineType= lineType, plotBottomToTop  = plotBottomToTop,
-            plotNames=plotNames,spaceBetweenFeatures=spaceBetweenFeatures, center=center)
+            plotNames=plotNames,spaceBetweenFeatures=spaceBetweenFeatures, center=center,keepOrder=keepOrder)
     if(!missing(textLabelFront)){
         s = as.character(textLabelFront)
         extendLeft=200
@@ -72,7 +72,7 @@ plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", 
 
 plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10,
     doLine=TRUE, lineAlpha=0.5, lineType= "dotted", plotBottomToTop  = FALSE, plotNames,
-    spaceBetweenFeatures, center=FALSE) {
+    spaceBetweenFeatures, center=FALSE,keepOrder=FALSE) {
     ## key function used to plot read and tx annotation
     ## x is a GRanges object with blocks
     ## plotBottomToTop TRUE for "+" strand FALSE for minus strand
@@ -82,7 +82,12 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
 
     thisMaxHeight = convertY(unit(1,"npc"),"points",valueOnly=TRUE)
 
-    mybins = disjointBins(x, ignore.strand=TRUE)
+    if(keepOrder){
+        mybins = seq_len(length(x))
+    } else{
+        mybins = disjointBins(x, ignore.strand=TRUE)
+    }
+
     nfeature = max(mybins)
     marginSpace = thisMaxHeight - featureHeight * nfeature
 
