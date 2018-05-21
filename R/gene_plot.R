@@ -1,7 +1,7 @@
 ### for plot clustered read with consensus of annotation
-### a complete rewrite 
+### a complete rewrite
 gene_plot = function(plotDat, title, plotTxLabel=TRUE,
-    debug=FALSE, drawSpaceBetweenReads = TRUE,
+    debug=FALSE,
     drawPanelRect = TRUE, drawReadCol = TRUE, drawReadBorder = FALSE, lineAlpha=0.2,lineWidth,
     doLine=TRUE, lineType= "dotted",readHeight){
     ## default settings
@@ -57,29 +57,31 @@ gene_plot = function(plotDat, title, plotTxLabel=TRUE,
 
     ############ draw GeneModel
     if(!is.null(plotDat$geneModel)){
-        plot_feature(plotDat$geneModel, vpr=which(names(VP)=="GeneModel"), coord = coord,
+        plot_feature_vpr(plotDat$geneModel, vpr=which(names(VP)=="GeneModel"), coord = coord,
             featureHeight = 4, featureAlpha = 0.8, doLine=TRUE, featureCols = "gray40",
-            lineAlpha=0.5, lineType= "dotted", drawSpaceBetweenReads=TRUE,center=TRUE)
+            lineAlpha=0.5, lineType= "dotted",center=TRUE)
     }
 
     #############
     thisCols = if(is.null(plotDat$consensus$itemRgb)){"darkgreen"} else {plotDat$consensus$itemRgb}
-    plot_feature(plotDat$consensus, vpr=which(names(VP)=="consensus"), coord = coord,
+    plot_feature_vpr(plotDat$consensus, vpr=which(names(VP)=="consensus"), coord = coord,
         featureHeight = 4, featureAlpha = 0.8, doLine=TRUE, featureCols = thisCols,
-        lineAlpha=0.5, lineType= "dotted", drawSpaceBetweenReads=TRUE, center=TRUE)
+        lineAlpha=0.5, lineType= "dotted", center=TRUE)
 
     #### data
     for(ithCluster in 1:(nDataTrack)){
         ########## draw tx annotation
 
-        plot_feature(plotDat$consensus[ithCluster],
+        plot_feature_vpr(plotDat$consensus[ithCluster],
             vpr=which(names(VP)==paste0("annot_",ithCluster)), coord = coord,
-            featureHeight = 4, featureAlpha = 0.5, doLine=TRUE, featureCols = "firebrick",
-            lineAlpha=0.5, lineType= "dotted", drawSpaceBetweenReads=FALSE,plotBottomToTop=FALSE, center=TRUE)
-        plot_feature(plotDat$reads[[ithCluster]],
+            featureHeight = 4, featureAlpha = 0.5, doLine=TRUE, featureCols =
+            if(is.null(plotDat$consensus[ithCluster]$itemRgb)){"firebrick"} else {plotDat$consensus[ithCluster]$itemRgb},
+            lineAlpha=0.5, lineType= "dotted",spaceBetweenFeatures=0,plotBottomToTop=FALSE, center=TRUE)
+        plot_feature_vpr(plotDat$reads[[ithCluster]],
             vpr=which(names(VP)==paste0("data_",ithCluster)), coord = coord,
                 featureHeight = readHeight, featureAlpha = 0.8, doLine=TRUE, featureCols = "steelblue",
-                lineAlpha=0.5, lineType= "dotted", drawSpaceBetweenReads=TRUE, plotBottomToTop=FALSE,center=FALSE,lineWidth=0.2)
+                lineAlpha=0.5, lineType= "dotted", spaceBetweenFeatures=0, plotBottomToTop=FALSE,
+                center=FALSE,lineWidth=0.2,textLabelFront = length(plotDat$reads[[ithCluster]]))
     }
     popViewport()
 }
