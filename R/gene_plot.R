@@ -44,7 +44,7 @@ gene_plot = function(plotDat, title, plotTxLabel=TRUE,
     if(!missing(title)){
         pushViewport(viewport(layout = grid.layout(2, 1, height = c(0.25,10)),width=0.95,height=0.95))
         pushViewport(viewport(layout.pos.col = 1, layout.pos.row = 1))
-        grid.text(title)
+        grid.text(title, gp = gpar(fontsize=5))
         popViewport()
         pushViewport(viewport(layout = grl, layout.pos.col = 1, layout.pos.row = 2))
     } else {
@@ -66,7 +66,7 @@ gene_plot = function(plotDat, title, plotTxLabel=TRUE,
     thisCols = if(is.null(plotDat$consensus$itemRgb)){"darkgreen"} else {plotDat$consensus$itemRgb}
     plot_feature_vpr(plotDat$consensus, vpr=which(names(VP)=="consensus"), coord = coord,
         featureHeight = 4, featureAlpha = 0.8, doLine=TRUE, featureCols = thisCols,
-        lineAlpha=0.5, lineType= "dotted", center=TRUE)
+        lineAlpha=0.5, lineType= "dotted", center=TRUE, keepOrder=TRUE)
 
     #### data
     for(ithCluster in 1:(nDataTrack)){
@@ -74,12 +74,12 @@ gene_plot = function(plotDat, title, plotTxLabel=TRUE,
 
         plot_feature_vpr(plotDat$consensus[ithCluster],
             vpr=which(names(VP)==paste0("annot_",ithCluster)), coord = coord,
-            featureHeight = 4, featureAlpha = 0.5, doLine=TRUE, featureCols =
+            featureHeight = 4, featureAlpha = 0.9, doLine=TRUE, featureCols =
             if(is.null(plotDat$consensus[ithCluster]$itemRgb)){"firebrick"} else {plotDat$consensus[ithCluster]$itemRgb},
             lineAlpha=0.5, lineType= "dotted",spaceBetweenFeatures=0,plotBottomToTop=FALSE, center=TRUE)
         plot_feature_vpr(plotDat$reads[[ithCluster]],
             vpr=which(names(VP)==paste0("data_",ithCluster)), coord = coord,
-                featureHeight = readHeight, featureAlpha = 0.8, doLine=TRUE, featureCols = "steelblue",
+                featureHeight = readHeight, featureAlpha = 0.75, doLine=TRUE, featureCols = "steelblue",
                 lineAlpha=0.5, lineType= "dotted", spaceBetweenFeatures=0, plotBottomToTop=FALSE,
                 center=FALSE,lineWidth=0.2,textLabelFront = length(plotDat$reads[[ithCluster]]))
     }
