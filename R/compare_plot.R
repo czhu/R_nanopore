@@ -50,15 +50,25 @@ num_to_color = function(x,from=range(x),to=c(0.2,0.8), cols=RColorBrewer::brewer
 
 simplify_num_output = function(x){sprintf("%.01f",x)}
 
+default_config = function(...){
+    list(
+        geneModel=list(color="#B22222"),
+        readConsensus=list(color="#4daf4a"),
+        read=list(color="steelblue")
+    )
+}
+
 ### an very ancient implementation should be removed at some point
 compare_plot = function(plotDat, plotTxLabel=TRUE,doCDS = TRUE,debug=FALSE, drawSpaceBetweenReads = TRUE,
     drawPanelRect = TRUE, drawReadCol = TRUE, drawReadBorder = FALSE, lineAlpha=0.2,lineWidth,
-    doLine=TRUE, lineType= "dotted" ){
+    doLine=TRUE, lineType= "dotted",config){
     ## default settings
     ## shall we draw CDS
     ## line between exons
-    readColor = "steelblue"
     readAltColor = "gray40"
+    if(missing(config)){
+        config = default_config()
+    }
      #"solid" ## line connecting reads
     ### all isoform variation
     hasMultiPanel = plotDat$param$nPanel > 1
@@ -89,7 +99,7 @@ compare_plot = function(plotDat, plotTxLabel=TRUE,doCDS = TRUE,debug=FALSE, draw
     if(hasMultiPanel) {VP = c(title = 0.25, VP)}
 
     ######### caculate plot range
-    coord = c(min(start(plotDat$exons)), max(end(plotDat$exons)))
+    coord = c(min(start(plotDat$geneModel)), max(end(plotDat$geneModel)))
     extraSpace = min(1000, diff(coord)*0.1)
     coord = c(coord[1]- extraSpace, coord[2] + extraSpace)
     ##########
@@ -104,6 +114,7 @@ compare_plot = function(plotDat, plotTxLabel=TRUE,doCDS = TRUE,debug=FALSE, draw
         pushViewport(viewport(layout = grid.layout(length(VP), 1, height=VP), width=0.95,height=0.95))
 
         ## work in points: totalSpace * ratioOfSpaceForData / numEffCounts
+        ## read height normalised
         readHeight = convertHeight(unit(1,"npc"),"points",valueOnly=TRUE) *
             spaceForData/sum(VP) / sum(plotDat$param$trackHeight) / plotDat$param$sizeFactor[vpCol]
 
@@ -118,133 +129,61 @@ compare_plot = function(plotDat, plotTxLabel=TRUE,doCDS = TRUE,debug=FALSE, draw
         ############
 
         ############ draw coord
-        pushViewport(dataViewport(xData=coord, yscale=c(0,0.3), extension=0, clip="off",
-                                  layout.pos.col=1, layout.pos.row=which(names(VP)=="coord")))
-        grid.lines(coord, c(0,0), default.units = "native")
-        tck = alongChromTicks(coord)
-        grid.text(label=formatC(tck, format="d"), x = tck, y = 0.1,
-                  just = c("centre", "bottom"), gp = gpar(cex=.4), default.units = "native")
-        grid.segments(x0 = tck, x1 = tck, y0 = 0, y1 = 0.08,  default.units = "native")
-        popViewport()
+        plot_coord(coord, vpr=which(names(VP)=="coord"))
         ############
 
-        ############ draw GeneModel  ## FIXME write a function?
-        myfeature = plotDat$exons
-        pushViewport(dataViewport(xData=coord, yscale=c(0,1), extension=0,
-            clip="off", layout.pos.col=1, layout.pos.row=which(names(VP)=="GeneModel")))
-        thisMaxHeight = convertY(unit(1,"npc"),"points",valueOnly=TRUE)
-        thisHeight = min(10, thisMaxHeight/2)
-        y0= (thisMaxHeight - thisHeight)/2 ## start in this middle
+        ############ draw GeneModel
+        plot_feature_vpr(plotDat$geneModel, vpr=which(names(VP)=="GeneModel"),
+            coord = coord,
+            featureHeight = 5, featureAlpha = 0.8, doLine=FALSE,
+            featureCols = config$geneModel$color,
+            lineAlpha=0.5, lineType= "dotted",center=TRUE)
 
-        grid.rect(x=end(myfeature),y=unit(y0, "points"),width=width(myfeature),
-            height=unit(thisHeight, "points"), gp=gpar(col = NA ,fill = "gray40", alpha=0.8),
-            default.units="native", just=c("right","bottom"))
-        ### no line for disjoint exons
-        #myx = c(end(myfeature)[-length(myfeature)],start(myfeature)[-1])
-        #grid.polyline(x=myx, y=unit(rep((y0+thisHeight)/2,length(myx)), "points"),id = rep(1:(length(myfeature)-1),2),
-        #    gp=gpar(col="grey", lwd=2,alpha=0.5), default.units = "native")
-        popViewport()
-        #############
-
-        #### data
+        ############ draw data per panel
         for(txIdx in 1:plotDat$param$nTrack){
             ########## draw tx annotation
-            pushViewport(dataViewport(xData=coord, yscale=c(0,1), extension=0, clip="off",
-                layout.pos.col=1,layout.pos.row=which(names(VP)==paste0("annot_",txIdx))))
-            myfeature= plotDat$tx[[txIdx]]  ## !!!sorted GRanges!!!!
+            thisFeature = plotDat$tx[txIdx]
+            thisCols = if(is.null(thisFeature$itemRgb)){config$readConsensus$color}
+                else { thisFeature$itemRgb}
 
-            thisMaxHeight = convertY(unit(1,"npc"),"points",valueOnly=TRUE)
-            thisHeight = min(10, thisMaxHeight/2)
-            y0= (thisMaxHeight - thisHeight)/2
-
-            grid.rect(end(myfeature),unit(y0,"points"),width=width(myfeature),height=unit(thisHeight,"points"),
-                gp=gpar(col = NA ,fill = "firebrick",alpha=0.5), default.units="native", just=c("right","bottom"))
-            ### grid line for annotattion
-            myx = c(end(myfeature)[-length(myfeature)],start(myfeature)[-1])
-            if(length(myx)>0){
-                grid.polyline(x=myx, y=unit(rep(y0+thisHeight/2, length(myx)),"points"),
-                    id = rep(1:(length(myfeature)-1),2),
-                    gp=gpar(col="firebrick", lwd=1,alpha=0.5,lty=lineType),
-                    default.units = "native")
+            if(plotTxLabel){
+                plot_feature_vpr(thisFeature, vpr=which(names(VP)==paste0("annot_",txIdx)),
+                    coord = coord,featureHeight = 4, featureAlpha = 0.8, doLine=TRUE,
+                    featureCols = thisCols,lineAlpha=0.5, lineType= "dotted",
+                    center=TRUE, keepOrder=FALSE)
+            } else {
+                plot_feature_vpr(thisFeature, vpr=which(names(VP)==paste0("annot_",txIdx)),
+                    coord = coord,featureHeight = 4, featureAlpha = 0.8, doLine=TRUE,
+                    featureCols = thisCols,lineAlpha=0.5, lineType= "dotted",
+                    center=TRUE, keepOrder=FALSE)
             }
-            if(plotTxLabel) {
-                grid.text(plotDat$param$trackNames[txIdx],y = unit(0.7, "npc"), gp=gpar(cex=0.4))}
-
-            if(doCDS) {
-                myfeature=plotDat$cds[[txIdx]]
-                if(length(myfeature)>0){
-                    extraHeight = min(5,thisMaxHeight/8)
-                    grid.rect(end(myfeature),unit(y0 - extraHeight,"points"),
-                    width=width(myfeature),
-                    height=unit(thisHeight + 2*extraHeight,"points"),
-                        gp=gpar(col = NA ,fill = "firebrick",alpha=0.5),
-                            default.units="native", just=c("right","bottom"))
-                }
-            }
-            popViewport()
 
             ###### draw data for isoform x
             if(plotDat$param$countMat[txIdx,vpCol]>0){
-                pushViewport(dataViewport(xData=coord, yscale=c(0,1), extension=0, clip="on",
-                    layout.pos.col=1,layout.pos.row=which(names(VP)==paste0("data_",txIdx))))
 
-                if(class(plotDat$data[[vpCol]][[txIdx]]) == "GenomicRanges"){
-                ## reads as bed imported using rtracklayer it should have column blocks
-                    myfeature= sort( blocks(plotDat$data[[vpCol]][[txIdx]]) )
-                } else {   ## typically GAlignments class for backward compatibility
-                    myfeature= sort( grglist(plotDat$data[[vpCol]][[txIdx]], drop.D.ranges=FALSE) )
-                }
-
-                #eachReadSpace = min(2,convertY(unit(1,"npc"),"points",valueOnly=TRUE)/length(myfeature))
-                readHeightInPoint = readHeight - spaceBetweenReadsInPoint
-                myx = unlist(end(myfeature))
-                ## for - strand stack top to bottom, for + strand bottom to top
-                if(plotDat$param$strand == "+"){
-                    yPerRead = seq(0, by=readHeight, length.out=length(myfeature))
-                    } else{
-                    yPerRead = seq(convertHeight(unit(1,"npc"),"points",valueOnly=TRUE),
-                        by=-readHeight, length.out=length(myfeature))
-                }
-                nFeatureEach = sapply(end(myfeature),length)
-
-                myy = rep(yPerRead, nFeatureEach)
+                thisData = plotDat$data[[vpCol]][[txIdx]]
 
                 if(drawReadCol){
-                    # mycols = rep(
-                    #     ifelse(mcols(plotDat$data[[vpCol]][[txIdx]])$is_fulllength, readColor,readAltColor),
-                    #     nFeatureEach) ### FIXME this should be a option
-                    mycols = rep(num_to_color(mcols(plotDat$data[[vpCol]][[txIdx]])$qscore,from=c(5,12)), nFeatureEach)
-                } else {mycols="steelblue"}
+                    mycols = rep(num_to_color(mcols(plotDat$data[[vpCol]][[txIdx]])$qscore,from=c(5,12)),
+                        length(thisData))
+                } else {mycols=config$read$color}
 
-                grid.rect(myx,unit(myy,"points"), width=unlist(width(myfeature)),
-                    height=unit(readHeightInPoint,"points"), gp=gpar(col = NA , fill = mycols, alpha=0.8),
-                    default.units="native", just=c("right","bottom"))
+                plot_feature_vpr(thisData,
+                    vpr = which(names(VP)==paste0("data_",txIdx)), coord = coord,
+                        featureHeight = readHeight,
+                        featureAlpha = 0.8, doLine=TRUE, featureCols = mycols,
+                        lineAlpha=0.5, lineType= "dotted", spaceBetweenFeatures=0,
+                        plotBottomToTop=FALSE,center=FALSE,lineWidth=0.2,
+                        textLabelFront = length(thisData) )
 
-                myxStart = lapply(end(myfeature),function(x) x[-length(x)])
-                myxEnd = lapply(start(myfeature),function(x) x[-1])
-                myy = c(rep(yPerRead, sapply(myxStart,length)), rep(yPerRead, sapply(myxEnd,length)))
-
-                if(doLine & length(unlist(c(myxStart,myxEnd)))>0){
-                    #penaltyFactorReadNumber = (1/log10(plotDat$param$normCountMat[txIdx,vpCol]))^2
-                    grid.polyline(
-                        x=unlist(c(myxStart,myxEnd)), y=unit(myy+readHeightInPoint/2,"points"),
-                        id = rep(1:length(unlist(myxStart)),2),
-                        gp=gpar(col=mycols,
-                            lwd=if(missing(lineWidth)) unit(min(1,readHeight/10),"points") else {
-                            unit(lineWidth,"points")},
-                        ## FIXME scale alpha depending on the number of reads
-                            alpha=lineAlpha,lty=lineType), ##lex=1/penaltyFactorReadNumber),
-                        default.units = "native")
-                }
-                if(debug)
-                    grid.text(
-                        paste("Raw", plotDat$param$countMat[txIdx,vpCol],
-                            "Norm", simplify_num_output(plotDat$param$normCountMat[txIdx,vpCol]),
-                            "SF", simplify_num_output(plotDat$param$sizeFactor[vpCol])),
-                        y = unit(ifelse(plotDat$param$strand == "+", 0.9, 0.1), "npc"), gp=gpar(cex=0.4))
+                # if(debug)
+                #     grid.text(
+                #         paste("Raw", plotDat$param$countMat[txIdx,vpCol],
+                #             "Norm", simplify_num_output(plotDat$param$normCountMat[txIdx,vpCol]),
+                #             "SF", simplify_num_output(plotDat$param$sizeFactor[vpCol])),
+                #         y = unit(ifelse(plotDat$param$strand == "+", 0.9, 0.1), "npc"), gp=gpar(cex=0.4))
                 #mypos = pretty(c(1,length(myfeature)))
                 #grid.yaxis(at=convertY(unit(mypos * eachReadSpace,"points"),"npc",valueOnly=TRUE),label=mypos,gp=gpar(col="red"))
-                popViewport()
             }
 
         }
