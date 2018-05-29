@@ -34,12 +34,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     doHighlightGene = !is.null(plotDat$gene)
     doRedcuedGene = !is.null(plotDat$geneModel_reduced)
     if(missing(config)){
-        config = list(
-            # geneModelColor = "lavenderblush3",
-            # geneModelReducedColor = "lemonchiffon3"
-            geneModelColor = "#B22222",
-            geneModelReducedColor = "#EF2D2D"
-        )
+        config = default_config()
     }
     genomeAxisHeight = 10
 
@@ -144,23 +139,23 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
 
     if(any(strand(myannot)=="+")) {
         plot_feature_vpr(subset(myannot, strand=="+"), vpr=which(names(VP)=="Annot_plus"),coord=coord,
-        featureHeight=3, plotBottomToTop=TRUE, featureCols=config$geneModelColor,doLine=FALSE,center=TRUE)
+        featureHeight=3, plotBottomToTop=TRUE, featureCols=config$geneModel$color,doLine=FALSE,center=TRUE)
     }
     if(any(strand(myannot)=="-")) {
         plot_feature_vpr(subset(myannot, strand=="-"), vpr=which(names(VP)=="Annot_minus"),coord=coord,
-        featureHeight=3, plotBottomToTop=FALSE,featureCols=config$geneModelColor,doLine=FALSE, center=TRUE)
+        featureHeight=3, plotBottomToTop=FALSE,featureCols=config$geneModel$color,doLine=FALSE, center=TRUE)
     }
 
     if(doRedcuedGene){
         myannot2 = plotDat$geneModel_reduced
         if(any(strand(myannot2)=="+")) {
             plot_feature_vpr(subset(myannot2, strand=="+"),vpr=which(names(VP)=="Annot_reduced_plus"),
-            coord=coord, featureHeight=3, plotBottomToTop=TRUE, featureCols=config$geneModelReducedColor,
+            coord=coord, featureHeight=3, plotBottomToTop=TRUE, featureCols=config$geneModel_reduced$color,
             doLine=FALSE,center=TRUE)
         }
         if(any(strand(myannot2)=="-")) {
             plot_feature_vpr(subset(myannot2, strand=="-"),vpr=which(names(VP)=="Annot_reduced_minus"),
-            coord=coord,featureHeight=3, plotBottomToTop=FALSE,featureCols=config$geneModelReducedColor,
+            coord=coord,featureHeight=3, plotBottomToTop=FALSE,featureCols=config$geneModel_reduced$color,
             doLine=FALSE, center=TRUE)
         }
     }
