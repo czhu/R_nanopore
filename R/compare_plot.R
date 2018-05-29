@@ -53,6 +53,7 @@ simplify_num_output = function(x){sprintf("%.01f",x)}
 default_config = function(...){
     list(
         geneModel=list(color="#B22222"),
+        geneModel_reduced = list( color = "#EF2D2D" ),
         readConsensus=list(color="#4daf4a"),
         read=list(color="steelblue")
     )
