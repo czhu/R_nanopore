@@ -12,6 +12,16 @@ draw_rect = function(vpr) {
     popViewport()
 }
 
+default_config = function(...){
+    ### height in points
+    list(
+        gene = list(color="black"),
+        geneModel=list(color="#B22222", height=3),
+        geneModel_reduced = list( color = "#EF2D2D" ),
+        readConsensus=list(color="#4daf4a", height=5),
+        read=list(color="steelblue")
+    )
+}
 
 ### input data
 validate_plotdat = function(x){
@@ -115,12 +125,15 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     #     myregion = regionName, coord, tgzFile = splicesiteFileIE,
     #     vpr = which(names(VP)=="ie"),col="saddlebrown",trsf=log2,lwd=0.25)
 
+    ## FIXME for annotation plus and minus code should be wrapped into the loop
+    ## this greatly reduces copy and paste of code
     ## annotation track
     if(doHighlightGene & length(plotDat$gene)>0){
         if(any(strand(plotDat$gene)=="+")) {
             isThiStrd = as.logical(strand(plotDat$gene)=="+")
             plot_feature_vpr(plotDat$gene[isThiStrd],vpr=which(names(VP)=="Gene_plus"),coord=coord,
-            featureHeight=0.5, plotBottomToTop=TRUE, featureCols="black",doLine=FALSE,center=TRUE,spaceBetweenFeatures=1)
+            featureHeight=0.5, plotBottomToTop=TRUE, featureCols= config$gene$color,
+                doLine=FALSE,center=TRUE,spaceBetweenFeatures=1)
             plot_feature_text_vpr(plotDat$gene[isThiStrd],
                 plotDat$gene$name[isThiStrd], vpr=which(names(VP)=="Gene_name_plus"),
                 coord, fontsize=3,side=0, col="black",xjust=unit(0,"npc"), yjust=y(0,"npc"),
@@ -129,7 +142,8 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
         if(any(strand(plotDat$gene)=="-")) {
             isThiStrd = as.logical(strand(plotDat$gene)=="-")
             plot_feature_vpr(plotDat$gene[isThiStrd],vpr=which(names(VP)=="Gene_minus"),coord=coord,
-            featureHeight=0.5, plotBottomToTop=FALSE,featureCols="black",doLine=FALSE, center=TRUE,spaceBetweenFeatures=1)
+            featureHeight=0.5, plotBottomToTop=FALSE,featureCols=config$gene$color,
+                doLine=FALSE, center=TRUE,spaceBetweenFeatures=1)
             plot_feature_text_vpr(plotDat$gene[isThiStrd],
                 plotDat$gene$name[isThiStrd], vpr=which(names(VP)=="Gene_name_minus"),
                 coord, fontsize=3,side=0, col="black",xjust=unit(0,"npc"), yjust=y(0,"npc"),
@@ -138,12 +152,18 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     }
 
     if(any(strand(myannot)=="+")) {
-        plot_feature_vpr(subset(myannot, strand=="+"), vpr=which(names(VP)=="Annot_plus"),coord=coord,
-        featureHeight=3, plotBottomToTop=TRUE, featureCols=config$geneModel$color,doLine=FALSE,center=TRUE)
+        thisFeature = subset(myannot, strand=="+")
+        plot_feature_vpr( thisFeature, vpr=which(names(VP)=="Annot_plus"),coord=coord,
+            featureHeight=config$geneModel$height, plotBottomToTop=TRUE,
+            featureCols= if(is.null(thisFeature$itemRgb)) {config$geneModel$color} else {thisFeature$itemRgb},
+            doLine=FALSE,center=TRUE)
     }
     if(any(strand(myannot)=="-")) {
-        plot_feature_vpr(subset(myannot, strand=="-"), vpr=which(names(VP)=="Annot_minus"),coord=coord,
-        featureHeight=3, plotBottomToTop=FALSE,featureCols=config$geneModel$color,doLine=FALSE, center=TRUE)
+        thisFeature = subset(myannot, strand=="-")
+        plot_feature_vpr( thisFeature, vpr=which(names(VP)=="Annot_minus"),coord=coord,
+            featureHeight=config$geneModel$height, plotBottomToTop=FALSE,
+            featureCols= if(is.null(thisFeature$itemRgb)) {config$geneModel$color} else {thisFeature$itemRgb},
+            doLine=FALSE, center=TRUE)
     }
 
     if(doRedcuedGene){
@@ -219,7 +239,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                             )
                         )
                         if(doConsensus){
-                            featureHeightConsensus = unit(5,"points")
+                            featureHeightConsensus = unit(config$readConsensus$height, "points")
                             if(thisStrd=="+"){
                                 newy1 = 0
                                 newy2 = featureHeightConsensus
@@ -239,7 +259,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                 height= featureHeightConsensus
                                 ))
                             plot_feature(thisCluster,
-                                featureCols=ifelse(is.null(thisCluster$itemRgb),"black", thisCluster$itemRgb),
+                                featureCols = if(is.null(thisCluster$itemRgb)) {"black"} else {thisCluster$itemRgb)},
                                     featureHeight=as.integer(featureHeightConsensus),
                                     doLine=TRUE,lineAlpha=1,lineType= "dotted",
                                     plotBottomToTop = ifelse(thisStrd=="+",TRUE,FALSE),
