@@ -50,15 +50,6 @@ num_to_color = function(x,from=range(x),to=c(0.2,0.8), cols=RColorBrewer::brewer
 
 simplify_num_output = function(x){sprintf("%.01f",x)}
 
-default_config = function(...){
-    list(
-        geneModel=list(color="#B22222"),
-        geneModel_reduced = list( color = "#EF2D2D" ),
-        readConsensus=list(color="#4daf4a"),
-        read=list(color="steelblue")
-    )
-}
-
 ### an very ancient implementation should be removed at some point
 compare_plot = function(plotDat, plotTxLabel=TRUE,doCDS = TRUE,debug=FALSE, drawSpaceBetweenReads = TRUE,
     drawPanelRect = TRUE, drawReadCol = TRUE, drawReadBorder = FALSE, lineAlpha=0.2,lineWidth,
