@@ -259,7 +259,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                 height= featureHeightConsensus
                                 ))
                             plot_feature(thisCluster,
-                                featureCols = if(is.null(thisCluster$itemRgb)) {"black"} else {thisCluster$itemRgb)},
+                                featureCols = if(is.null(thisCluster$itemRgb)) {"black"} else {thisCluster$itemRgb},
                                     featureHeight=as.integer(featureHeightConsensus),
                                     doLine=TRUE,lineAlpha=1,lineType= "dotted",
                                     plotBottomToTop = ifelse(thisStrd=="+",TRUE,FALSE),
