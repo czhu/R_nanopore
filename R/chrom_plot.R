@@ -317,7 +317,6 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
 
                         if(plotCountNum){
                             s = as.character(thisCluster$count)
-                            message("Printing",s)
                             grid.text(s,
                                 x= unit(convertX(unit(min(start(x)) - extendLeft,"native"),"npc",
                                     valueOnly=TRUE)-convertX(unit(1,"strwidth",s),"npc",valueOnly=TRUE),"npc"),
