@@ -263,7 +263,12 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                     featureHeight=as.integer(featureHeightConsensus),
                                     doLine=TRUE,lineAlpha=1,lineType= "dotted",
                                     plotBottomToTop = ifelse(thisStrd=="+",TRUE,FALSE),
-                                    center=TRUE)
+                                    center=TRUE, plotNames = )
+                            plot_feature_text(
+                                thisCluster,
+                                thisCluster$name, fontsize=2, side=0, col="black",
+                                xjust=unit(0,"npc"), yjust=y(0,"npc"),
+                                plotBottomToTop = (thisStrd =="+"), debug=FALSE)
                             if(doHighlight){
                                 ## loop because thisCluster could have multiple hits
                                 for(thisName in names(thisCluster)){
