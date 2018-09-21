@@ -44,9 +44,19 @@
 ## config
 
 ## test purpose
-# data(immt_tx_reads)
+## single panel
+# data(immt)
 # gene_plot_single_panel(GeneModel=geneModelFull, txConsensus, txReads, txHighlight,title ="Mytest")
 # gene_plot_single_panel(GeneModel=geneModelProtLinc, txConsensus, txReads, txHighlight)
+
+## multi panel
+# txReadsList = list(txReads, txReads, txReads)
+# names(txReadsList) = c("WC","WC=NC","R634Q")
+# sizeFactor = c(2,1,0.5)
+# gene_plot_multi_panel(GeneModel=asBED(GRangesList(disjoin(geneModelProtLinc))),
+#     txConsensus, txReadsList, txHighlight,
+#     title="IMMT", plotTopToBottom=TRUE, axisHeight= 15, consensusTrackHeight = 5,
+#     consensusFeatureHeight = 4, sizeFactor=sizeFactor)
 
 plot_config_default = function(...){
     list(
@@ -78,8 +88,80 @@ add_title = function (title, titleHeight=10,titleFontSize = 7) {
     popViewport()
 }
 
+GENEMODELFEATUREHEIGHT = 3
+GENEMODELSPACEBETWEENFEATURES = 1
+GENEMODELEXTRAMARGIN = 5
+
+gene_plot_multi_panel = function(GeneModel, txConsensus, txReadsList, txHighlight,
+    title, plotTopToBottom=TRUE, axisHeight= 15, consensusTrackHeight = 5,
+    consensusFeatureHeight = 4, sizeFactor=rep(1, length(txReadsList)) ){
+
+    if(!missing(title)){
+        add_title(title, titleHeight=10)
+        pushViewport(viewport(layout.pos.col = 1, layout.pos.row = 2))
+    } else {
+        pushViewport(viewport(width=0.95, height=0.95))
+    }
+
+    ## all we need to do is figure out the track height
+    ## and call gene_plot_single_panel with defined trackHeights
+
+    geneModelTrackHeight = length(GeneModel) *
+        (GENEMODELFEATUREHEIGHT + GENEMODELSPACEBETWEENFEATURES) + GENEMODELEXTRAMARGIN
+
+    totalHeightInPoints = convertHeight(unit(1,"npc"),"points",valueOnly=TRUE)
+    trackHeightsConsensus = rep(consensusTrackHeight, length(txConsensus))
+
+    spaceLeftForReads = totalHeightInPoints - axisHeight -
+        sum(trackHeightsConsensus) - geneModelTrackHeight
+
+    # if(spaceLeftForReads<100){
+    #     stop("not enough space for plotting reads, considering inrease page height")
+    # }
+    ## tx by sample
+    countMat = do.call(cbind, lapply(txReadsList, function(x) sapply(x, length)))
+    countMatNorm = countMat / sizeFactor
+    nMaxReadsPerTrack = apply(countMatNorm, 1, max)
+
+    readHeightNorm = spaceLeftForReads/sum(nMaxReadsPerTrack)
+    readHeightPerSample = readHeightNorm / sizeFactor
+
+    trackHeightData = nMaxReadsPerTrack * readHeightNorm
+    trackHeights =  c(geneModelTrackHeight, sapply(seq_len(length(txConsensus) * 2), function(i){
+            if(i%%2){
+                trackHeightsConsensus[i%/%2+1]
+            } else {
+                trackHeightData[i%/%2]
+            }
+        }))
+
+    ### calling
+    pushViewport(
+        viewport( layout = grid.layout(nrow=1, ncol=length(txReadsList)) )
+    )
+
+    for( i in seq_len(length(txReadsList)) ) {
+        message(i, "Panel")
+        pushViewport(viewport(layout.pos.col = i, layout.pos.row = 1))
+        gene_plot_single_panel(
+            GeneModel=GeneModel, txConsensus=txConsensus,
+            txReadsList[[i]], txHighlight, title=names(txReadsList)[i],
+            plotTopToBottom=TRUE, axisHeight= 15, consensusTrackHeight = 5,
+            consensusFeatureHeight = 4,trackHeights=trackHeights,
+            readHeight=readHeightPerSample[i])
+        popViewport()
+    }
+    popViewport()
+
+    if(!missing(title))
+        popViewport()
+
+    popViewport()
+}
+
 gene_plot_single_panel = function(GeneModel, txConsensus, txReads, txHighlight,
-    title, plotTopToBottom=TRUE) {
+    title, plotTopToBottom=TRUE, axisHeight= 15, consensusTrackHeight = 5,
+    consensusFeatureHeight = 4,trackHeights, readHeight) {
 
     if(!missing(title)){
         add_title(title, titleHeight=10)
@@ -100,39 +182,40 @@ gene_plot_single_panel = function(GeneModel, txConsensus, txReads, txHighlight,
 
     ## config for Gene Model track
     geneModelConfig = plot_config_default()
-    geneModelConfig$featureHeight = 3
-    geneModelConfig$spaceBetweenFeatures = 1
+    geneModelConfig$featureHeight = GENEMODELFEATUREHEIGHT
+    geneModelConfig$spaceBetweenFeatures = GENEMODELSPACEBETWEENFEATURES
     geneModelConfig$featureColor = "gray40"
     geneModelConfig$center = TRUE
     geneModelConfig$plotBottomToTop = !plotTopToBottom
 
     ## default unit is in points
-    axisHeight= 15
-    consensusTrackHeight = 5
-    consensusFeatureHeight = 4
-    geneModelTrackHeight = length(GeneModel) *
-        (geneModelConfig$featureHeight + geneModelConfig$spaceBetweenFeatures) + 5
+    if(missing(trackHeights)){
+        geneModelTrackHeight = length(GeneModel) *
+            (geneModelConfig$featureHeight + geneModelConfig$spaceBetweenFeatures) + 5
 
-    totalHeightInPoints = convertHeight(unit(1,"npc"),"points",valueOnly=TRUE)
-    trackHeightsConsensus = rep(consensusTrackHeight, length(txConsensus))
+        totalHeightInPoints = convertHeight(unit(1,"npc"),"points",valueOnly=TRUE)
+        trackHeightsConsensus = rep(consensusTrackHeight, length(txConsensus))
 
-    spaceLeftForReads = totalHeightInPoints - axisHeight -
-        sum(trackHeightsConsensus) - geneModelTrackHeight
+        spaceLeftForReads = totalHeightInPoints - axisHeight -
+            sum(trackHeightsConsensus) - geneModelTrackHeight
 
-    # if(spaceLeftForReads<100){
-    #     stop("not enough space for plotting reads, considering inrease page height")
-    # }
-    nreadsPerTrack = sapply(txReads, length)
-    readHeight = spaceLeftForReads/sum(nreadsPerTrack)
+        # if(spaceLeftForReads<100){
+        #     stop("not enough space for plotting reads, considering inrease page height")
+        # }
+        nreadsPerTrack = sapply(txReads, length)
+        if(missing(readHeight)){
+            readHeight = spaceLeftForReads/sum(nreadsPerTrack)
+        }
 
-    trackHeightData = nreadsPerTrack * readHeight
-    trackHeights =  c(geneModelTrackHeight, sapply(seq_len(length(txConsensus) * 2), function(i){
-            if(i%%2){
-                trackHeightsConsensus[i%/%2+1]
-            } else {
-                trackHeightData[i%/%2]
-            }
-        }))
+        trackHeightData = nreadsPerTrack * readHeight
+        trackHeights =  c(geneModelTrackHeight, sapply(seq_len(length(txConsensus) * 2), function(i){
+                if(i%%2){
+                    trackHeightsConsensus[i%/%2+1]
+                } else {
+                    trackHeightData[i%/%2]
+                }
+            }))
+    }
 
     plotConfig = lapply(seq_len(length(txConsensus) * 2), function(i){
             ans = plot_config_default()
@@ -163,6 +246,8 @@ gene_plot_single_panel = function(GeneModel, txConsensus, txReads, txHighlight,
 
     txClass_plotter(plotData, plotConfig, axisHeight=axisHeight,
         trackHeights = trackHeights)
+    if(!missing(title))
+        popViewport()
     popViewport()
 }
 
