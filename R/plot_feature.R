@@ -62,7 +62,7 @@ plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", 
             x= unit(convertX(unit(min(start(x)) - extendLeft,"native"),"npc",
                 valueOnly=TRUE)-convertX(unit(1,"strwidth","s"),"npc",valueOnly=TRUE),"npc"),
             0.5,
-        just=c("left","center"),gp=gpar(fontsize=4
+        just=c("left","center"),gp=gpar(fontsize=6
             #convertY(unit(0.5,"npc"),"points",valueOnly=TRUE)
         ))
     }
