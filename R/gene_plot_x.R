@@ -71,7 +71,7 @@ plot_config_default = function(...){
         center = FALSE,
         lineWidth = 0.2,
         textLabelFront = NULL,
-        highlightFontsize = 4,
+        highlightFontsize = 6,
         highlightColor = "black"
     )
 }
@@ -82,7 +82,7 @@ add_title = function (title, titleHeight=10,titleFontSize = 7) {
         viewport(
             layout = grid.layout(2, 1,
             height = unit(c(titleHeight,totalHeightInPoints-titleHeight),"points")),
-        width=0.95,height=0.95))
+        width=1,height=1))
     pushViewport(viewport(layout.pos.col = 1, layout.pos.row = 1))
     grid.text(title, gp = gpar(fontsize=titleFontSize))
     popViewport()
@@ -100,7 +100,7 @@ gene_plot_multi_panel = function(GeneModel, txConsensus, txReadsList, txHighligh
         add_title(title, titleHeight=10)
         pushViewport(viewport(layout.pos.col = 1, layout.pos.row = 2))
     } else {
-        pushViewport(viewport(width=0.95, height=0.95))
+        pushViewport(viewport(width=1, height=1))
     }
 
     ## all we need to do is figure out the track height
@@ -141,7 +141,6 @@ gene_plot_multi_panel = function(GeneModel, txConsensus, txReadsList, txHighligh
     )
 
     for( i in seq_len(length(txReadsList)) ) {
-        message(i, "Panel")
         pushViewport(viewport(layout.pos.col = i, layout.pos.row = 1))
         gene_plot_single_panel(
             GeneModel=GeneModel, txConsensus=txConsensus,
@@ -167,7 +166,7 @@ gene_plot_single_panel = function(GeneModel, txConsensus, txReads, txHighlight,
         add_title(title, titleHeight=10)
         pushViewport(viewport(layout.pos.col = 1, layout.pos.row = 2))
     } else {
-        pushViewport(viewport(width=0.95, height=0.95))
+        pushViewport(viewport(width=1, height=1))
     }
 
     ## Data tracks including Gene Model
@@ -287,45 +286,46 @@ txClass_plotter = function(plotData, plotConfig, plotTopToBottom=TRUE,
         vprIndex = which(names(VP)==paste0(dataTrackPrefix, i))
         thisPlotConfig = plotConfig[[i]]
         thisPlotData = plotData[[i]]
+        if( length(thisPlotData) > 0 ) {
+            get_value = function(x) {
+                if(is.null(thisPlotConfig[[x]]))
+                    plot_config_default()[[x]]
+                else
+                    thisPlotConfig[[x]]
+               }
 
-        get_value = function(x) {
-            if(is.null(thisPlotConfig[[x]]))
-                plot_config_default()[[x]]
-            else
-                thisPlotConfig[[x]]
-           }
-
-        plot_feature_vpr(
-            thisPlotData,
-            vpr = vprIndex,
-            coord = coord,
-            featureHeight = get_value("featureHeight"),
-            featureAlpha = get_value("featureAlpha"),
-            doLine = get_value("doLine"),
-            featureCols = get_value("featureColor"),
-            lineAlpha = get_value("lineAlpha"),
-            lineType = get_value("dotted"),
-            spaceBetweenFeatures = get_value("spaceBetweenFeatures"),
-            plotBottomToTop = !plotTopToBottom,
-            center = get_value("center"),
-            lineWidth = get_value("lineWidth"),
-            textLabelFront = get_value("textLabelFront")
-        )
-        ## highlight
-        plot_label = function(x) {
-            plot_feature_text_vpr(
-                thisPlotConfig[[x]],
-                thisPlotConfig[[x]]$label,
+            plot_feature_vpr(
+                thisPlotData,
                 vpr = vprIndex,
                 coord = coord,
-                fontsize = get_value("highlightFontsize"),
-                side = 0,
-                col = get_value("highlightColor"),
-                plotBottomToTop = !plotTopToBottom )
-        }
+                featureHeight = get_value("featureHeight"),
+                featureAlpha = get_value("featureAlpha"),
+                doLine = get_value("doLine"),
+                featureCols = get_value("featureColor"),
+                lineAlpha = get_value("lineAlpha"),
+                lineType = get_value("dotted"),
+                spaceBetweenFeatures = get_value("spaceBetweenFeatures"),
+                plotBottomToTop = !plotTopToBottom,
+                center = get_value("center"),
+                lineWidth = get_value("lineWidth"),
+                textLabelFront = get_value("textLabelFront")
+            )
+            ## highlight
+            plot_label = function(x) {
+                plot_feature_text_vpr(
+                    thisPlotConfig[[x]],
+                    thisPlotConfig[[x]]$label,
+                    vpr = vprIndex,
+                    coord = coord,
+                    fontsize = get_value("highlightFontsize"),
+                    side = 0,
+                    col = get_value("highlightColor"),
+                    plotBottomToTop = !plotTopToBottom )
+            }
 
-        if( !is.null(thisPlotConfig[["highlight"]]) ){
-            plot_label("highlight")
+            if( !is.null(thisPlotConfig[["highlight"]]) ){
+                plot_label("highlight")
+            }
         }
     }
     popViewport()
