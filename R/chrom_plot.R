@@ -29,6 +29,7 @@ validate_plotdat = function(x){
     return( all(names(x$consensus) == names(x$reads)) )
 }
 
+HIGHLIGHT_FONTSIZE = 5
 chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     spaceBetweenCluster = 5, debug = TRUE,doConsensus=TRUE, config){
     # x is plot data
@@ -277,7 +278,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                         grid.text(plotDat$highlight[[wh]]$shape,
                                             x= unit(convertX(unit(start(plotDat$consensus[wh]) - extendLeft,"native"),"npc",
                                                 valueOnly=TRUE)-convertX(unit(1,"strwidth","s"),"npc",valueOnly=TRUE),"npc"),
-                                            0.5,just=c("left","center"),gp=gpar(fontsize=4))
+                                            0.5,just=c("left","center"),gp=gpar(fontsize=HIGHLIGHT_FONTSIZE))
                                         if(!is.null(plotDat$highlight[[wh]]$highlight)){
                                             thisStart = start(plotDat$highlight[[wh]]$highlight)
                                             thisEnd = end(plotDat$highlight[[wh]]$highlight)
@@ -289,7 +290,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                                     center=TRUE)
                                             grid.text(plotDat$highlight[[wh]]$highlight$shape,
                                                 x = convertX(unit((thisStart+thisEnd)/2,"native"),"npc"),
-                                                y=0.9,just="center",gp=gpar(fontsize=4))
+                                                y=0.9,just="center",gp=gpar(fontsize=HIGHLIGHT_FONTSIZE))
                                         }
                                     }
                                 }
@@ -326,7 +327,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                 x= unit(convertX(unit(min(start(x)) - extendLeft,"native"),"npc",
                                     valueOnly=TRUE)-convertX(unit(1,"strwidth",s),"npc",valueOnly=TRUE),"npc"),
                                 0.5,
-                            just=c("left","center"),gp=gpar(fontsize=4
+                            just=c("left","center"),gp=gpar(fontsize=HIGHLIGHT_FONTSIZE
                                 #convertY(unit(0.5,"npc"),"points",valueOnly=TRUE)
                             ))
                         }
