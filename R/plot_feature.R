@@ -57,7 +57,7 @@ plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", 
             plotNames=plotNames,spaceBetweenFeatures=spaceBetweenFeatures, center=center,keepOrder=keepOrder)
     if(!missing(textLabelFront)){
         s = as.character(textLabelFront)
-        extendLeft=200
+        extendLeft=500
         grid.text(s,
             x= unit(convertX(unit(min(start(x)) - extendLeft,"native"),"npc",
                 valueOnly=TRUE)-convertX(unit(1,"strwidth","s"),"npc",valueOnly=TRUE),"npc"),
