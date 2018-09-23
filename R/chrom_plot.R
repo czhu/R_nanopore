@@ -29,7 +29,7 @@ validate_plotdat = function(x){
     return( all(names(x$consensus) == names(x$reads)) )
 }
 
-HIGHLIGHT_FONTSIZE = 5
+HIGHLIGHT_FONTSIZE = 4
 chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     spaceBetweenCluster = 5, debug = TRUE,doConsensus=TRUE, config){
     # x is plot data
@@ -126,63 +126,42 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     #     myregion = regionName, coord, tgzFile = splicesiteFileIE,
     #     vpr = which(names(VP)=="ie"),col="saddlebrown",trsf=log2,lwd=0.25)
 
-    ## FIXME for annotation plus and minus code should be wrapped into the loop
-    ## this greatly reduces copy and paste of code
-    ## annotation track
-    if(doHighlightGene & length(plotDat$gene)>0){
-        if(any(strand(plotDat$gene)=="+")) {
-            isThiStrd = as.logical(strand(plotDat$gene)=="+")
-            plot_feature_vpr(plotDat$gene[isThiStrd],vpr=which(names(VP)=="Gene_plus"),coord=coord,
-            featureHeight=0.5, plotBottomToTop=TRUE, featureCols= config$gene$color,
-                doLine=FALSE,center=TRUE,spaceBetweenFeatures=1)
-            plot_feature_text_vpr(plotDat$gene[isThiStrd],
-                plotDat$gene$name[isThiStrd], vpr=which(names(VP)=="Gene_name_plus"),
-                coord, fontsize=3,side=0, col="black",xjust=unit(0,"npc"), yjust=y(0,"npc"),
-                plotBottomToTop=TRUE,debug=FALSE)
-        }
-        if(any(strand(plotDat$gene)=="-")) {
-            isThiStrd = as.logical(strand(plotDat$gene)=="-")
-            plot_feature_vpr(plotDat$gene[isThiStrd],vpr=which(names(VP)=="Gene_minus"),coord=coord,
-            featureHeight=0.5, plotBottomToTop=FALSE,featureCols=config$gene$color,
-                doLine=FALSE, center=TRUE,spaceBetweenFeatures=1)
-            plot_feature_text_vpr(plotDat$gene[isThiStrd],
-                plotDat$gene$name[isThiStrd], vpr=which(names(VP)=="Gene_name_minus"),
-                coord, fontsize=3,side=0, col="black",xjust=unit(0,"npc"), yjust=y(0,"npc"),
-                plotBottomToTop=FALSE,debug=FALSE)
-        }
-    }
-
-    if(any(strand(myannot)=="+")) {
-        thisFeature = subset(myannot, strand=="+")
-        plot_feature_vpr( thisFeature, vpr=which(names(VP)=="Annot_plus"),coord=coord,
-            featureHeight=config$geneModel$height, plotBottomToTop=TRUE,
-            featureCols= if(is.null(thisFeature$itemRgb)) {config$geneModel$color} else {thisFeature$itemRgb},
-            doLine=FALSE,center=TRUE)
-    }
-    if(any(strand(myannot)=="-")) {
-        thisFeature = subset(myannot, strand=="-")
-        plot_feature_vpr( thisFeature, vpr=which(names(VP)=="Annot_minus"),coord=coord,
-            featureHeight=config$geneModel$height, plotBottomToTop=FALSE,
-            featureCols= if(is.null(thisFeature$itemRgb)) {config$geneModel$color} else {thisFeature$itemRgb},
-            doLine=FALSE, center=TRUE)
-    }
-
-    if(doRedcuedGene){
-        myannot2 = plotDat$geneModel_reduced
-        if(any(strand(myannot2)=="+")) {
-            plot_feature_vpr(subset(myannot2, strand=="+"),vpr=which(names(VP)=="Annot_reduced_plus"),
-            coord=coord, featureHeight=3, plotBottomToTop=TRUE, featureCols=config$geneModel_reduced$color,
-            doLine=FALSE,center=TRUE)
-        }
-        if(any(strand(myannot2)=="-")) {
-            plot_feature_vpr(subset(myannot2, strand=="-"),vpr=which(names(VP)=="Annot_reduced_minus"),
-            coord=coord,featureHeight=3, plotBottomToTop=FALSE,featureCols=config$geneModel_reduced$color,
-            doLine=FALSE, center=TRUE)
-        }
-    }
-
     ## draw data track
-    for(thisStrd in c("+","-")){
+    strds = c("plus", "minus")
+    names(strds) = c("+", "-")
+
+    for(thisStrd in names(strds) ){
+
+        if(doHighlightGene & length(plotDat$gene)>0){
+            if(any(strand(plotDat$gene)== thisStrd)) {
+                isThiStrd = as.logical(strand(plotDat$gene)== thisStrd)
+                plot_feature_vpr(plotDat$gene[isThiStrd],vpr=which(names(VP)== paste0("Gene_", strds[thisStrd]) ),
+                coord=coord, featureHeight=0.5, plotBottomToTop=TRUE, featureCols= config$gene$color,
+                    doLine=FALSE,center=TRUE,spaceBetweenFeatures=1)
+                plot_feature_text_vpr(plotDat$gene[isThiStrd],
+                    plotDat$gene$name[isThiStrd], vpr=which(names(VP)== paste0("Gene_name_", strds[thisStrd])),
+                    coord, fontsize=HIGHLIGHT_FONTSIZE, side=0, col="black",xjust=unit(0,"npc"), yjust=y(0,"npc"),
+                    plotBottomToTop=TRUE,debug=FALSE)
+            }
+        }
+
+        if(any(strand(myannot)== thisStrd)) {
+            thisFeature = subset(myannot, strand== thisStrd)
+            plot_feature_vpr( thisFeature, vpr=which(names(VP)== paste0("Annot_", strds[thisStrd])),coord=coord,
+                featureHeight=config$geneModel$height, plotBottomToTop=TRUE,
+                featureCols= if(is.null(thisFeature$itemRgb)) {config$geneModel$color} else {thisFeature$itemRgb},
+                doLine=FALSE,center=TRUE)
+        }
+
+        if(doRedcuedGene){
+            myannot2 = plotDat$geneModel_reduced
+            if(any(strand(myannot2)== thisStrd)) {
+                plot_feature_vpr(subset(myannot2, strand== thisStrd),vpr=which(names(VP)== paste0("Annot_reduced_", strds[thisStrd])),
+                coord=coord, featureHeight=3, plotBottomToTop=TRUE, featureCols=config$geneModel_reduced$color,
+                doLine=FALSE,center=TRUE)
+            }
+        }
+
         isThisStrand = strand(plotDat$consensus) == thisStrd
         if(any(isThisStrand)){
             pushViewport(viewport(xscale=coord,clip="off",
@@ -267,7 +246,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                     center=TRUE, plotNames = )
                             plot_feature_text(
                                 thisCluster,
-                                thisCluster$name, fontsize=2, side=0, col="black",
+                                thisCluster$name, fontsize=HIGHLIGHT_FONTSIZE-1, side=0, col="black",
                                 xjust=unit(0,"npc"), yjust=y(0,"npc"),
                                 plotBottomToTop = (thisStrd =="+"), debug=FALSE)
                             if(doHighlight){
