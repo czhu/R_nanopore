@@ -146,16 +146,17 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
             default.units = "native")
     }
     if(!missing(plotNames)){
-        nTrack = max(mybins)
-        if(plotBottomToTop) {
-            thisy = mybins * (1/nTrack) + 1/nTrack/2
-        } else {
-            thisy = 1 - mybins * (1/nTrack)  + 1/nTrack/2
-        }
-
-        grid.text(plotNames,
-            x = unit((start(x) + end(x))/2,"native"),
-            y = unit(thisy, "npc"),gp=gpar(cex=0.4))
+        stop("plotNames is deprecated. The functionality is replaced by plot_feature_text")
+        # nTrack = max(mybins)
+        # if(plotBottomToTop) {
+        #     thisy = mybins * (1/nTrack) + 1/nTrack/2
+        # } else {
+        #     thisy = 1 - mybins * (1/nTrack)  + 1/nTrack/2
+        # }
+        #
+        # grid.text(plotNames,
+        #     x = unit((start(x) + end(x))/2,"native"),
+        #     y = unit(thisy, "npc"),gp=gpar(cex=0.4))
     }
 
 }
