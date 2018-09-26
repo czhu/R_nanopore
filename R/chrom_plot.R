@@ -30,6 +30,9 @@ validate_plotdat = function(x){
 }
 
 HIGHLIGHT_FONTSIZE = 4
+CONSENSUS_NAME_FONTSIZE = 3
+DO_CONSENSUS_NAME = TRUE
+
 chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     spaceBetweenCluster = 5, debug = TRUE,doConsensus=TRUE, config){
     # x is plot data
@@ -243,12 +246,14 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                     featureHeight=as.integer(featureHeightConsensus),
                                     doLine=TRUE,lineAlpha=1,lineType= "dotted",
                                     plotBottomToTop = ifelse(thisStrd=="+",TRUE,FALSE),
-                                    center=TRUE, plotNames = )
-                            plot_feature_text(
-                                thisCluster,
-                                thisCluster$name, fontsize=HIGHLIGHT_FONTSIZE-1, side=0, col="black",
-                                xjust=unit(0,"npc"), yjust=y(0,"npc"),
-                                plotBottomToTop = (thisStrd =="+"), debug=FALSE)
+                                    center=TRUE)
+                            if(DO_CONSENSUS_NAME){
+                                plot_feature_text(
+                                    thisCluster,
+                                    thisCluster$name, fontsize=CONSENSUS_NAME_FONTSIZE, side=0, col="black",
+                                    xjust=unit(0,"npc"), yjust=y(0,"npc"),
+                                    plotBottomToTop = (thisStrd =="+"), debug=FALSE)
+                            }
                             if(doHighlight){
                                 ## loop because thisCluster could have multiple hits
                                 for(thisName in names(thisCluster)){
