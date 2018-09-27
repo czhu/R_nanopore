@@ -12,12 +12,23 @@ draw_rect = function(vpr) {
     popViewport()
 }
 
+# default_config = function(...){
+#     ### height in points
+#     list(
+#         gene = list(color="black"),
+#         geneModel=list(color="#B22222", height=3),
+#         geneModel_reduced = list( color = "#EF2D2D" ),
+#         readConsensus=list(color="#4daf4a", height=5),
+#         read=list(color="steelblue")
+#     )
+# }
+
 default_config = function(...){
     ### height in points
     list(
         gene = list(color="black"),
-        geneModel=list(color="#B22222", height=3),
-        geneModel_reduced = list( color = "#EF2D2D" ),
+        geneModel=list(color="#984ea3", height=3),
+        geneModel_reduced = list( color = "#B771C2", height=3 ),
         readConsensus=list(color="#4daf4a", height=5),
         read=list(color="steelblue")
     )
@@ -160,7 +171,8 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
             myannot2 = plotDat$geneModel_reduced
             if(any(strand(myannot2)== thisStrd)) {
                 plot_feature_vpr(subset(myannot2, strand== thisStrd),vpr=which(names(VP)== paste0("Annot_reduced_", strds[thisStrd])),
-                coord=coord, featureHeight=3, plotBottomToTop=TRUE, featureCols=config$geneModel_reduced$color,
+                coord=coord, featureHeight=config$geneModel$height, plotBottomToTop=TRUE,
+                featureCols=config$geneModel_reduced$color,
                 doLine=FALSE,center=TRUE)
             }
         }
