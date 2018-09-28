@@ -12,17 +12,19 @@ draw_rect = function(vpr) {
     popViewport()
 }
 
+### red
 # default_config = function(...){
 #     ### height in points
 #     list(
 #         gene = list(color="black"),
 #         geneModel=list(color="#B22222", height=3),
-#         geneModel_reduced = list( color = "#EF2D2D" ),
+#         geneModel_reduced = list( color = "#EF2D2D", height=3 ),
 #         readConsensus=list(color="#4daf4a", height=5),
 #         read=list(color="steelblue")
 #     )
 # }
 
+## purple
 default_config = function(...){
     ### height in points
     list(
@@ -33,6 +35,18 @@ default_config = function(...){
         read=list(color="steelblue")
     )
 }
+
+## tan
+# default_config = function(...){
+#     ### height in points
+#     list(
+#         gene = list(color="black"),
+#         geneModel=list(color="#CD853F", height=3),
+#         geneModel_reduced = list( color = "#F1A668", height=3 ),
+#         readConsensus=list(color="#4daf4a", height=5),
+#         read=list(color="steelblue")
+#     )
+# }
 
 ### input data
 validate_plotdat = function(x){
@@ -85,17 +99,19 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     #     spacePerDataTrack["Data_plus"], spacePerAnnotTrack["Annot_plus"],"coverage"=10,
     #     "axis"=genomeAxisHeight,"ie"=5,"ei"=5,
     #     spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
-
+    ## extra 2 px spacing between data and annotation
     if(doHighlightGene) {
         #mygenes = plotDat$gene
         VP = c(
-            spacePerDataTrack["Data_plus"], spacePerAnnotTrack["Annot_plus"], Gene_name_plus=5,
-            Gene_plus = 5,"axis"=genomeAxisHeight, Gene_minus = 5, Gene_name_minus =5,
-            spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
+            spacePerDataTrack["Data_plus"], 2,  spacePerAnnotTrack["Annot_plus"],
+            Gene_name_plus=5, Gene_plus = 5,"axis"=genomeAxisHeight,
+            Gene_minus = 5, Gene_name_minus =5,
+            spacePerAnnotTrack["Annot_minus"], 2, spacePerDataTrack["Data_minus"])
     } else {
         VP = c(
-            spacePerDataTrack["Data_plus"], spacePerAnnotTrack["Annot_plus"],
-            "axis"=genomeAxisHeight, spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
+            spacePerDataTrack["Data_plus"], 2, spacePerAnnotTrack["Annot_plus"],
+            "axis"=genomeAxisHeight, spacePerAnnotTrack["Annot_minus"], 2,
+            spacePerDataTrack["Data_minus"])
     }
     if(doRedcuedGene){
         indexToInsert=which(names(VP) =="Annot_plus")-1
@@ -171,7 +187,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
             myannot2 = plotDat$geneModel_reduced
             if(any(strand(myannot2)== thisStrd)) {
                 plot_feature_vpr(subset(myannot2, strand== thisStrd),vpr=which(names(VP)== paste0("Annot_reduced_", strds[thisStrd])),
-                coord=coord, featureHeight=config$geneModel$height, plotBottomToTop=TRUE,
+                coord=coord, featureHeight=config$geneModel_reduced$height, plotBottomToTop=TRUE,
                 featureCols=config$geneModel_reduced$color,
                 doLine=FALSE,center=TRUE)
             }
