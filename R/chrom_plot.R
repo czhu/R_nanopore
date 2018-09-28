@@ -59,13 +59,17 @@ CONSENSUS_NAME_FONTSIZE = 3
 DO_CONSENSUS_NAME = TRUE
 
 chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
-    spaceBetweenCluster = 5, debug = TRUE,doConsensus=TRUE, config){
+    spaceBetweenCluster = 5, debug = TRUE,doConsensus=TRUE, config, singleStrand=FALSE){
     # x is plot data
     # plotDat = list(
     #     consensus = thisCluster, this should contian count
     #     geneModel = knownGene,
     #     reads = thisReads
     # )
+    ## CHANGED 2018-09-28
+    ## add singleStrand for single strand mode for gene_plot_log
+    ## all data and annotation should have minus strand FIXME this is currently not checked
+
     stopifnot(validate_plotdat(plotDat))
     ## a few plot paramter
     myannot = plotDat$geneModel
@@ -89,10 +93,10 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
 
     ## height of the page
     wholeSpaceHeight = convertY(unit(1,"npc"),"points",valueOnly=TRUE)
-    spacePerDataTrack = c(
-        (wholeSpaceHeight - genomeAxisHeight)/2 - spacePerAnnotTrack["Annot_plus"],
-        (wholeSpaceHeight - genomeAxisHeight)/2 - spacePerAnnotTrack["Annot_minus"])
-    names(spacePerDataTrack) = c("Data_plus","Data_minus")
+    # spacePerDataTrack = c(
+    #     (wholeSpaceHeight - genomeAxisHeight)/2 - spacePerAnnotTrack["Annot_plus"],
+    #     (wholeSpaceHeight - genomeAxisHeight)/2 - spacePerAnnotTrack["Annot_minus"])
+    # names(spacePerDataTrack) = c("Data_plus","Data_minus")
 
     ## ie, ei, coverage should really be optionnal
     # VP = c(
@@ -100,23 +104,31 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     #     "axis"=genomeAxisHeight,"ie"=5,"ei"=5,
     #     spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
     ## extra 2 px spacing between data and annotation
-    if(doHighlightGene) {
-        #mygenes = plotDat$gene
+    spaceBetweenAnnotationAndData = 2
+
+    if(singleStrand){
         VP = c(
-            spacePerDataTrack["Data_plus"], 2,  spacePerAnnotTrack["Annot_plus"],
-            Gene_name_plus=5, Gene_plus = 5,"axis"=genomeAxisHeight,
-            Gene_minus = 5, Gene_name_minus =5,
-            spacePerAnnotTrack["Annot_minus"], 2, spacePerDataTrack["Data_minus"])
+            "axis"=genomeAxisHeight,
+            Gene_minus = ifelse(doHighlightGene, 5, 0),
+            Gene_name_minus = ifelse(doHighlightGene, 5, 0),
+            spacePerAnnotTrack["Annot_minus"], spaceBetweenAnnotationAndData)
+        VP = c(VP, "Data_minus" = wholeSpaceHeight - sum(VP) )
     } else {
         VP = c(
-            spacePerDataTrack["Data_plus"], 2, spacePerAnnotTrack["Annot_plus"],
-            "axis"=genomeAxisHeight, spacePerAnnotTrack["Annot_minus"], 2,
-            spacePerDataTrack["Data_minus"])
+            spaceBetweenAnnotationAndData,  spacePerAnnotTrack["Annot_plus"],
+            Gene_name_plus=ifelse(doHighlightGene, 5, 0), Gene_plus = ifelse(doHighlightGene, 5, 0),
+            "axis"=genomeAxisHeight,
+            Gene_minus = ifelse(doHighlightGene, 5, 0), Gene_name_minus =ifelse(doHighlightGene, 5, 0),
+            spacePerAnnotTrack["Annot_minus"], spaceBetweenAnnotationAndData)
+        VP = c("Data_plus" = (wholeSpaceHeight - sum(VP))/2, VP, "Data_minus" = (wholeSpaceHeight - sum(VP))/2 )
     }
+
     if(doRedcuedGene){
-        indexToInsert=which(names(VP) =="Annot_plus")-1
-        VP = append(VP, spacePerAnnotTrack["Annot_plus"],indexToInsert)
-        names(VP)[indexToInsert+1] = "Annot_reduced_plus"
+        if( !singleStrand ){
+            indexToInsert=which(names(VP) =="Annot_plus")-1
+            VP = append(VP, spacePerAnnotTrack["Annot_plus"],indexToInsert)
+            names(VP)[indexToInsert+1] = "Annot_reduced_plus"
+        }
 
         indexToInsert=which(names(VP) =="Annot_minus")
         VP = append(VP, spacePerAnnotTrack["Annot_minus"],indexToInsert)
@@ -157,8 +169,13 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     #     vpr = which(names(VP)=="ie"),col="saddlebrown",trsf=log2,lwd=0.25)
 
     ## draw data track
-    strds = c("plus", "minus")
-    names(strds) = c("+", "-")
+    if(singleStrand){
+        strds = "minus"
+        names(strds) =  "-"
+    } else {
+        strds = c("plus", "minus")
+        names(strds) = c("+", "-")
+    }
 
     for(thisStrd in names(strds) ){
 
