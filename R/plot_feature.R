@@ -39,7 +39,7 @@ plot_coord = function(coord, vpr) {
 ### FIXME: x could be GenomicRangesList, where each element in a list is a exon, this would be more general
 plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10,
     doLine=TRUE, lineAlpha=0.5, lineType= "dotted", plotBottomToTop  = FALSE, plotNames,
-    spaceBetweenFeatures, center=FALSE,textLabelFront,keepOrder=FALSE) {
+    spaceBetweenFeatures, center=FALSE,keepOrder=FALSE, textLabelFront, textLabelFrontFontSize=6) {
     ## x is a GRanges object with blocks
     ## conivence functon to call plot_feature with vpr
     if(missing(vpr)) {
@@ -57,14 +57,11 @@ plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", 
             plotNames=plotNames,spaceBetweenFeatures=spaceBetweenFeatures, center=center,keepOrder=keepOrder)
     if(!missing(textLabelFront)){
         s = as.character(textLabelFront)
-        extendLeft=500
         grid.text(s,
-            x= unit(convertX(unit(min(start(x)) - extendLeft,"native"),"npc",
-                valueOnly=TRUE)-convertX(unit(1,"strwidth","s"),"npc",valueOnly=TRUE),"npc"),
+            x= unit(convertX(unit(median(start(x)),"native"),"points",
+                valueOnly=TRUE)- textLabelFrontFontSize,"points"),
             0.5,
-        just=c("left","center"),gp=gpar(fontsize=6
-            #convertY(unit(0.5,"npc"),"points",valueOnly=TRUE)
-        ))
+        just=c("right","center"),gp=gpar(fontsize=textLabelFrontFontSize))
     }
     popViewport()
 }
@@ -216,7 +213,6 @@ plot_feature_text_vpr  = function(x, text, vpr,coord, fontsize=12,side=0, col="b
     pushViewport(
         dataViewport(xData=coord, yscale=c(0,1), extension=0, clip="off",
         layout.pos.col=1,layout.pos.row=vpr))
-    plot_feature_text(x=x,text=text,fontsize=fontsize,side=side, col=col, just=just, xjust=xjust, yjust=yjust,
-            plotBottomToTop=plotBottomToTop,debug=debug)
+    plot_feature_text(x=x,text=text,fontsize=fontsize,side=side, col=col, just=just, xjust=xjust, yjust=yjust, plotBottomToTop=plotBottomToTop,debug=debug)
     popViewport()
 }
