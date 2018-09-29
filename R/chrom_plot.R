@@ -304,10 +304,12 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                 for(thisName in names(thisCluster)){
                                     wh = which(names(plotDat$consensus) == thisName)
                                     if(!is.null(plotDat$highlight[[wh]])){
+
+                                        ## label in front of consensus tx
                                         grid.text(plotDat$highlight[[wh]]$shape,
-                                            x= unit(convertX(unit(start(plotDat$consensus[wh]) - extendLeft,"native"),"npc",
-                                                valueOnly=TRUE)-convertX(unit(1,"strwidth","s"),"npc",valueOnly=TRUE),"npc"),
-                                            0.5,just=c("left","center"),gp=gpar(fontsize=HIGHLIGHT_FONTSIZE))
+                                            x = unit(convertX(unit(start(plotDat$consensus[wh]),
+                                                "native"),"points", valueOnly=TRUE) - HIGHLIGHT_FONTSIZE, "points"),
+                                            0.5,just=c("right","center"),gp=gpar(fontsize=HIGHLIGHT_FONTSIZE))
                                         if(!is.null(plotDat$highlight[[wh]]$highlight)){
                                             thisStart = start(plotDat$highlight[[wh]]$highlight)
                                             thisEnd = end(plotDat$highlight[[wh]]$highlight)
@@ -353,10 +355,10 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                         if(plotCountNum){
                             s = as.character(thisCluster$count)
                             grid.text(s,
-                                x= unit(convertX(unit(min(start(x)) - extendLeft,"native"),"npc",
-                                    valueOnly=TRUE)-convertX(unit(1,"strwidth",s),"npc",valueOnly=TRUE),"npc"),
+                                x= unit(convertX(unit(median(start(x)),"native"),"points",
+                                    valueOnly=TRUE)- HIGHLIGHT_FONTSIZE,"points"),
                                 0.5,
-                            just=c("left","center"),gp=gpar(fontsize=HIGHLIGHT_FONTSIZE
+                            just=c("right","center"),gp=gpar(fontsize=HIGHLIGHT_FONTSIZE
                                 #convertY(unit(0.5,"npc"),"points",valueOnly=TRUE)
                             ))
                         }
