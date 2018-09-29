@@ -181,10 +181,11 @@ plot_feature_text = function(x,text,fontsize=12,side=0, col="black",xjust=unit(0
          (mybins-1) * featureHeight}
          else { ## usually for "-" strand
         convertY(unit(1,"npc"),"points",valueOnly=TRUE) - mybins * featureHeight}
-
-    grid.rect(myx, unit(myy,"points"), width=width(x),
-        height=unit(featureHeight,"points"), gp=gpar(col = ifelse(debug,"black",NA) , fill = NA),
-        default.units="native", just=c("left","bottom"))
+    if(debug){
+        grid.rect(myx, unit(myy,"points"), width=width(x),
+            height=unit(featureHeight,"points"), gp=gpar(col = "black" , fill = NA),
+            default.units="native", just=c("left","bottom"))
+    }
     ## for side other than 0 play with 1 strwidth and strheight
     ## use signif to make sure there are not too many digits after converting from npc to points
     if(side==0){
@@ -203,7 +204,7 @@ plot_feature_text = function(x,text,fontsize=12,side=0, col="black",xjust=unit(0
         hjust = xjust, vjust = yjust, gp = gpar(col=col,fontsize=fontsize))
 }
 
-plot_feature_text_vpr  = function(x, text, vpr,coord, fontsize=12,side=0, col="black",xjust=unit(0,"npc"), yjust=y(0,"npc"),
+plot_feature_text_vpr  = function(x, text, vpr,coord, fontsize=12,side=0, col="black",xjust=unit(0,"npc"), yjust=unit(0,"npc"),
     plotBottomToTop=TRUE,debug=FALSE) {
     ## x is a GRanges object with blocks
     ## conivence functon to call plot_feature with vpr
