@@ -55,11 +55,11 @@ validate_plotdat = function(x){
 }
 
 HIGHLIGHT_FONTSIZE = 4
-CONSENSUS_NAME_FONTSIZE = 3
+CONSENSUS_NAME_FONTSIZE = 3.5
 DO_CONSENSUS_NAME = TRUE
 
 chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
-    spaceBetweenCluster = 5, debug = TRUE,doConsensus=TRUE, config, singleStrand=FALSE){
+    spaceBetweenCluster = 5, debug = TRUE,doConsensus=TRUE, config,     spaceBetweenAnnotationAndData = 4, singleStrand=FALSE, shiftLabel=FALSE){
     # x is plot data
     # plotDat = list(
     #     consensus = thisCluster, this should contian count
@@ -104,7 +104,6 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     #     "axis"=genomeAxisHeight,"ie"=5,"ei"=5,
     #     spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
     ## extra 2 px spacing between data and annotation
-    spaceBetweenAnnotationAndData = 3
 
     if(singleStrand){
         VP = c(
@@ -187,7 +186,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                     doLine=FALSE,center=TRUE,spaceBetweenFeatures=1)
                 plot_feature_text_vpr(plotDat$gene[isThiStrd],
                     plotDat$gene$name[isThiStrd], vpr=which(names(VP)== paste0("Gene_name_", strds[thisStrd])),
-                    coord, fontsize=HIGHLIGHT_FONTSIZE, side=0, col="black",xjust=unit(0,"npc"), yjust=y(0,"npc"),
+                    coord, fontsize=HIGHLIGHT_FONTSIZE, side=0, col="black",
                     plotBottomToTop=TRUE,debug=FALSE)
             }
         }
@@ -293,11 +292,19 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                     plotBottomToTop = ifelse(thisStrd=="+",TRUE,FALSE),
                                     center=TRUE)
                             if(DO_CONSENSUS_NAME){
-                                plot_feature_text(
-                                    thisCluster,
-                                    thisCluster$name, fontsize=CONSENSUS_NAME_FONTSIZE, side=0, col="black",
-                                    xjust=unit(0,"npc"), yjust=unit(0,"npc"),
-                                    plotBottomToTop = (thisStrd =="+"), debug=FALSE)
+                                if(shiftLabel) {
+                                    plot_feature_text(
+                                        thisCluster,
+                                        thisCluster$name, fontsize=CONSENSUS_NAME_FONTSIZE, side=0, col="black",
+                                        #just=c("center",ifelse(thisStrd == "+" , "bottom","top")),
+                                        yjust = ifelse(thisStrd=="+", 2, -0.8),
+                                        xjust = 0.5,
+                                        plotBottomToTop = (thisStrd =="+"), debug=FALSE)
+                                } else {
+                                    plot_feature_text(
+                                        thisCluster,
+                                        thisCluster$name, fontsize=CONSENSUS_NAME_FONTSIZE, side=0, col="black", plotBottomToTop = (thisStrd =="+"), debug=FALSE)
+                                }
                             }
                             if(doHighlight){
                                 ## loop because thisCluster could have multiple hits
