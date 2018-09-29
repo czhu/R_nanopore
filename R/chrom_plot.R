@@ -104,7 +104,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     #     "axis"=genomeAxisHeight,"ie"=5,"ei"=5,
     #     spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
     ## extra 2 px spacing between data and annotation
-    spaceBetweenAnnotationAndData = 2
+    spaceBetweenAnnotationAndData = 3
 
     if(singleStrand){
         VP = c(
@@ -296,7 +296,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                 plot_feature_text(
                                     thisCluster,
                                     thisCluster$name, fontsize=CONSENSUS_NAME_FONTSIZE, side=0, col="black",
-                                    xjust=unit(0,"npc"), yjust=y(0,"npc"),
+                                    xjust=unit(0,"npc"), yjust=unit(0,"npc"),
                                     plotBottomToTop = (thisStrd =="+"), debug=FALSE)
                             }
                             if(doHighlight){
