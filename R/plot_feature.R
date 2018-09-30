@@ -80,9 +80,13 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
     spaceBetweenFeatures=featureHeight/8, center=FALSE,keepOrder=FALSE, scaleFeatureHeightToVP=FALSE) {
     ## key function used to plot read and tx annotation
     ## x is a GRanges object with blocks
+    ## featureHeight include spaceBetweenFeatures !!!
     ## plotBottomToTop TRUE for "+" strand FALSE for minus strand
     ## center: if the whole plotting should be centered in the view area
     ## scaleFeatureToVP: should the featureHeight be scaled according to the viewport's area
+    if( spaceBetweenFeatures >= featureHeight ) {
+        stop("spacing between features can't be >= height of feature")
+    }
 
     if(missing(coord)) {
         coord = c(min(start(x)), max(end(x)))
@@ -100,28 +104,29 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
 
     if(scaleFeatureHeightToVP) {
         ## scaling avoids overflow i.e. drawing space cannot acommodate this many feature given the size
-        featureHeightWithSpacing =  thisMaxHeight/nfeature
-        featureHeightSpacingRatio = featureHeight / (featureHeight + spaceBetweenFeatures)
-        featureHeight = featureHeightWithSpacing * featureHeightSpacingRatio
-        spaceBetweenFeatures = featureHeightSpacingRatio - featureHeight
+        featureHeightSpacingRatio = 1 - spaceBetweenFeatures/featureHeight
+        featureHeight = thisMaxHeight/nfeature
+        featureHeightNoSpacing = featureHeight * featureHeightSpacingRatio
+        spaceBetweenFeatures = featureHeight - featureHeightNoSpacing
     } else {
-        featureHeightWithSpacing = featureHeight + spaceBetweenFeatures
+        featureHeightNoSpacing = featureHeight - spaceBetweenFeatures
     }
 
-    marginSpace = thisMaxHeight - featureHeightWithSpacing * nfeature
+    marginSpace = thisMaxHeight - featureHeight * nfeature
 
     myfeature = blocks(x)
     myx = unlist(start(myfeature))
 
     ## for - strand stack top to bottom, for + strand bottom to top
     if(plotBottomToTop){### usually for "+" strand
-        yPerRead = (mybins-1) * featureHeightWithSpacing
+        yPerRead = (mybins-1) * featureHeight
     } else{ ## usually for "-" strand
         ## we omit -1 here because grid.rect is left bottom justed
-        yPerRead = thisMaxHeight - mybins  * featureHeightWithSpacing
+        yPerRead = thisMaxHeight - mybins  * featureHeight
     }
 
     yPerRead = yPerRead + spaceBetweenFeatures/2
+
     if(center) {
         yPerRead = yPerRead + sign(plotBottomToTop-0.5) * marginSpace/2
     }
@@ -138,7 +143,7 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
         lineCols = featureCols
     }
 
-    grid.rect(myx, unit(myy,"points"), width=unlist(width(myfeature)), height=unit(featureHeight,"points"), gp=gpar(col = NA , fill = featureCols, alpha=featureAlpha), default.units="native", just=c("left","bottom"))
+    grid.rect(myx, unit(myy,"points"), width=unlist(width(myfeature)), height=unit(featureHeightNoSpacing, "points"), gp=gpar(col = NA , fill = featureCols, alpha=featureAlpha), default.units="native", just=c("left","bottom"))
 
     ## FIXME: wrap this as a function draw_line ?
     cumLength = cumsum(elementNROWS(myfeature))
@@ -152,10 +157,10 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
         myyLine = c(rep(yPerRead, nFeatureEach-1), rep(yPerRead, nFeatureEach-1))
         grid.polyline(
             x = unlist(c(myxStart,myxEnd)),
-            y = unit(myyLine + featureHeight/2,"points"),
+            y = unit(myyLine + featureHeightNoSpacing/2, "points"),
             id = rep(1:length(unlist(myxStart)),2),
             gp=gpar(col=lineCols,
-                lwd=if(missing(lineWidth)) unit(min(1,featureHeight/10),"points") else {
+                lwd=if(missing(lineWidth)) unit(min(1,featureHeightNoSpacing/8),"points") else {
                 unit(lineWidth,"points")},
             ## FIXME scale alpha depending on the number of reads
                 alpha=lineAlpha,lty=lineType), ##lex=1/penaltyFactorReadNumber),
