@@ -38,9 +38,8 @@ plot_coord = function(coord, vpr) {
 ### this is core plotting function for plotting granges with exons (in blocks slot)
 ### FIXME: x could be GenomicRangesList, where each element in a list is a exon, this would be more general
 plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10,
-    doLine=TRUE, lineAlpha=0.5, lineType= "dotted", plotBottomToTop  = FALSE, plotNames,
-    spaceBetweenFeatures=featureHeight/8,
-    center=FALSE, keepOrder=FALSE, textLabelFront, textLabelFrontFontSize=6, scaleFeatureHeightToVP=FALSE) {
+    doLine=TRUE, lineAlpha=0.5, lineType= "dotted", plotBottomToTop  = FALSE,
+    spaceBetweenFeatures, center=FALSE, keepOrder=FALSE, textLabelFront, textLabelFrontFontSize=6, scaleFeatureHeightToVP=FALSE) {
     ## x is a GRanges object with blocks
     ## conivence functon to call plot_feature with vpr
     if(missing(vpr)) {
@@ -77,7 +76,7 @@ plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", 
 
 plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10,
     doLine=TRUE, lineAlpha=0.5, lineType= "dotted", plotBottomToTop  = FALSE, plotNames,
-    spaceBetweenFeatures=featureHeight/8, center=FALSE,keepOrder=FALSE, scaleFeatureHeightToVP=FALSE) {
+    spaceBetweenFeatures, center=FALSE,keepOrder=FALSE, scaleFeatureHeightToVP=FALSE) {
     ## key function used to plot read and tx annotation
     ## x is a GRanges object with blocks
     ## featureHeight does not include spaceBetweenFeatures !!!
@@ -98,6 +97,13 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
     }
 
     nfeature = max(mybins)
+
+    ## if spaceBetweenFeatures not defined, 1/8 featureHeight as spacing the rest as new featureHeight
+    if(missing(spaceBetweenFeatures)) {
+        spaceBetweenFeatures = featureHeight/8
+        featureHeightWithSpacing = featureHeight
+        featureHeight = featureHeightWithSpacing - spaceBetweenFeatures
+    }
 
     if(scaleFeatureHeightToVP) {
         ## scaling avoids overflow i.e. drawing space cannot acommodate this many feature given the size
