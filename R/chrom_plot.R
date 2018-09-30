@@ -71,12 +71,14 @@ validate_plotdat = function(x){
     return( all(names(x$consensus) == names(x$reads)) )
 }
 
-HIGHLIGHT_FONTSIZE = 4
-CONSENSUS_NAME_FONTSIZE = 3.5
-DO_CONSENSUS_NAME = TRUE
 
 chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
-    spaceBetweenCluster = 5, debug = TRUE,doConsensus=TRUE, config,     spaceBetweenAnnotationAndData = 4, singleStrand=FALSE, shiftLabel=FALSE,     geneTrackHeight = 4, geneNameFontsize = 4, geneNameTrackHeight = geneNameFontsize * 2){
+    spaceBetweenCluster = 5, debug = TRUE,doConsensus=TRUE, config,     spaceBetweenAnnotationAndData = 4, singleStrand=FALSE, shiftLabel=FALSE,     geneTrackHeight = 4, geneNameFontsize = 4, geneNameTrackHeight = geneNameFontsize * 2,
+        consensusNameFontsize = 3.5, doConsensusName=TRUE, highlightFontsize=4,     genomeAxisHeight = 10
+    ){
+    CONSENSUS_NAME_FONTSIZE = consensusNameFontsize
+    DO_CONSENSUS_NAME = doConsensusName
+    HIGHLIGHT_FONTSIZE = highlightFontsize
     # x is plot data
     # plotDat = list(
     #     consensus = thisCluster, this should contian count
@@ -96,7 +98,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     if(missing(config)){
         config = default_config()
     }
-    genomeAxisHeight = 10
+
 
     extendLeft = 200 ## in bp
     extendRight = 200
