@@ -36,6 +36,23 @@ default_config = function(...){
     )
 }
 
+generate_plot_config = function(x){
+    ## x is list of list
+    ## list(object=list(type=value))
+    ans = default_config()
+    if(!missing(x)) {
+        if( !is.list(x) ) stop("x has to be a list")
+        for (thisObject in names(x)) {
+            if(is.null(ans[[thisObject]]))
+                ans[[thisObject]] = list()
+            for ( thisType in names(x[[thisObject]]) ) {
+                ans[[thisObject]][[thisType]] = x[[thisObject]][[thisType]]
+            }
+        }
+    }
+    return(ans)
+}
+
 ## tan
 # default_config = function(...){
 #     ### height in points
