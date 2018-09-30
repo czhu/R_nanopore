@@ -116,9 +116,9 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
 
     marginSpace = thisMaxHeight - featureHeightWithSpacing * nfeature
 
-    if(marginSpace<0){
-        warning("Plot exceeds the viewport. Consider using scaleFeatureHeightToVP.")
-    }
+    # if(marginSpace<0){
+    #     warning("Plot exceeds the viewport. Consider using scaleFeatureHeightToVP.")
+    # }
 
     myfeature = blocks(x)
     myx = unlist(start(myfeature))
