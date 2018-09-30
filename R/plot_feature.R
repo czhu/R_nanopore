@@ -57,8 +57,7 @@ plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", 
     plot_feature(x=x, coord=coord, lineWidth=lineWidth,
             featureCols=featureCols, featureAlpha=featureAlpha, featureHeight=featureHeight,
             doLine=doLine, lineAlpha=lineAlpha, lineType= lineType,
-            plotBottomToTop=plotBottomToTop,
-            plotNames=plotNames, spaceBetweenFeatures=spaceBetweenFeatures, center=center,keepOrder=keepOrder, scaleFeatureHeightToVP=scaleFeatureHeightToVP)
+            plotBottomToTop=plotBottomToTop, spaceBetweenFeatures=spaceBetweenFeatures, center=center,keepOrder=keepOrder, scaleFeatureHeightToVP=scaleFeatureHeightToVP)
 
     ## FIXME replace this by plot_feature_text with side = 1 once it's implemented
     if(!missing(textLabelFront)){
