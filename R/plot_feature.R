@@ -183,20 +183,24 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
 # pushViewport(dataViewport(xData=c(10,100), yscale=c(0,1), extension=0, clip="off"))
 # grid.rect()
 # plot_feature_text(x,mytext,fontsize=20,debug=TRUE,plotBottomToTop=FALSE)
-plot_feature_text = function(x, text, fontsize=12, side=0, col="black",just="center", xjust=NULL, yjust=NULL, plotBottomToTop=TRUE, debug=FALSE){
+plot_feature_text = function(x, text, fontsize=12, side=0, col="black",just="center", xjust=NULL, yjust=NULL, plotBottomToTop=TRUE, spacing = 0, debug=FALSE){
     ## side: 0 center,1, left, 2,top 3,right 4 bottom
     ## xjust, yjust, shift in x or y if defined, currently ignored
     ## textSize: text height in points
+    ## spacing: extra space to the board
+
     mybins = disjointBins(x)
     featureHeight = fontsize
-    if(side!=0) stop("side other than center has not been implemented")
+    if( ! side %in% seq(0,4) ) stop("side can be only 0 (center), 1,2,3,4 ")
     myx = start(x)
 
     ## for - strand stack top to bottom, for + strand bottom to top
-    myy = if(plotBottomToTop){### usually for "+" strand
-         (mybins-1) * featureHeight}
-         else { ## usually for "-" strand
-        convertY(unit(1,"npc"),"points",valueOnly=TRUE) - mybins * featureHeight}
+    myy = if(plotBottomToTop){ ### usually for "+" strand
+         (mybins-1) * featureHeight
+     } else { ## usually for "-" strand
+        convertHeight(unit(1,"npc"),"points",valueOnly=TRUE) - mybins * featureHeight
+    }
+
     if(debug){
         grid.rect(myx, unit(myy,"points"), width=width(x),
             height=unit(featureHeight,"points"), gp=gpar(col = "black" , fill = NA),
@@ -204,23 +208,33 @@ plot_feature_text = function(x, text, fontsize=12, side=0, col="black",just="cen
     }
     ## for side other than 0 play with 1 strwidth and strheight
     ## use signif to make sure there are not too many digits after converting from npc to points
-    if(side==0){
-        xtext = (start(x) + end(x))/2
-        ytext = myy + featureHeight/2
-    } else if (side == 1) {
-        ## substrct 1 strwidth
-        xtext = (start(x) + end(x))/2
-        ytext = myy + featureHeight/2
+    if( length(just) ==1 )
+        just = rep(just, 2)
+    x_native_to_points = function(xloc) {convertX(unit(xloc , "native"), "points", valueOnly=TRUE)}
+
+    ## default  in the center
+    xtext = x_native_to_points((start(x) + end(x))/2)
+    ytext = myy + featureHeight/2
+
+    if (side == 1) { ## left
+        xtext = x_native_to_points(start(x)) - spacing
+        just[1] = "right"
     } else if (side == 2) {
-        xtext = (start(x) + end(x))/2
-        #ytext = myy + featureHeight*1.5
+        ytext = myy + featureHeight + spacing
+        just[2] = "bottom"
+    } else if (side == 3) {
+        xtext = x_native_to_points(end(x)) + spacing
+        just[1] = "left"
+    } else if (side == 4) {
+        ytext = myy - spacing
+        just[2] = "top"
     }
 
-    grid.text(text, x =unit(xtext,"native"), y = unit(ytext,"points"),just=just,
+    grid.text(text, x =unit(xtext,"points"), y = unit(ytext,"points"),just=just,
         hjust = xjust, vjust = yjust, gp = gpar(col=col,fontsize=fontsize))
 }
 
-plot_feature_text_vpr  = function(x, text, vpr,coord, fontsize=12,side=0, col="black", just = "center", xjust=NULL, yjust=NULL, plotBottomToTop=TRUE, debug=FALSE) {
+plot_feature_text_vpr  = function(x, text, vpr,coord, fontsize=12,side=0, col="black", just = "center", xjust=NULL, yjust=NULL, spacing = 0, plotBottomToTop=TRUE, debug=FALSE) {
     ## x is a GRanges object with blocks
     ## conivence functon to call plot_feature with vpr
     if(missing(vpr)) {
@@ -232,6 +246,6 @@ plot_feature_text_vpr  = function(x, text, vpr,coord, fontsize=12,side=0, col="b
     pushViewport(
         dataViewport(xData=coord, yscale=c(0,1), extension=0, clip="off",
         layout.pos.col=1,layout.pos.row=vpr))
-    plot_feature_text(x=x,text=text,fontsize=fontsize,side=side, col=col, just=just, xjust=xjust, yjust=yjust, plotBottomToTop=plotBottomToTop,debug=debug)
+    plot_feature_text(x=x,text=text,fontsize=fontsize,side=side, col=col, just=just, xjust=xjust, yjust=yjust, spacing=spacing, plotBottomToTop=plotBottomToTop,debug=debug)
     popViewport()
 }
