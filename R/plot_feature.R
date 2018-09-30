@@ -39,7 +39,8 @@ plot_coord = function(coord, vpr) {
 ### FIXME: x could be GenomicRangesList, where each element in a list is a exon, this would be more general
 plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10,
     doLine=TRUE, lineAlpha=0.5, lineType= "dotted", plotBottomToTop  = FALSE, plotNames,
-    spaceBetweenFeatures, center=FALSE,keepOrder=FALSE, textLabelFront, textLabelFrontFontSize=6) {
+    spaceBetweenFeatures=featureHeight/8,
+    center=FALSE, keepOrder=FALSE, textLabelFront, textLabelFrontFontSize=6, scaleFeatureHeightToVP=FALSE) {
     ## x is a GRanges object with blocks
     ## conivence functon to call plot_feature with vpr
     if(missing(vpr)) {
@@ -48,13 +49,19 @@ plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", 
     if(missing(coord)) {
         coord = c(min(start(x)), max(end(x)))
     }
+
     pushViewport(
         dataViewport(xData=coord, yscale=c(0,1), extension=0, clip="off",
-        layout.pos.col=1,layout.pos.row=vpr))
+        layout.pos.col=1,layout.pos.row=vpr)
+    )
+
     plot_feature(x=x, coord=coord, lineWidth=lineWidth,
             featureCols=featureCols, featureAlpha=featureAlpha, featureHeight=featureHeight,
-            doLine=doLine, lineAlpha=lineAlpha, lineType= lineType, plotBottomToTop  = plotBottomToTop,
-            plotNames=plotNames,spaceBetweenFeatures=spaceBetweenFeatures, center=center,keepOrder=keepOrder)
+            doLine=doLine, lineAlpha=lineAlpha, lineType= lineType,
+            plotBottomToTop=plotBottomToTop,
+            plotNames=plotNames, spaceBetweenFeatures=spaceBetweenFeatures, center=center,keepOrder=keepOrder, scaleFeatureHeightToVP=scaleFeatureHeightToVP)
+
+    ## FIXME replace this by plot_feature_text with side = 1 once it's implemented
     if(!missing(textLabelFront)){
         s = as.character(textLabelFront)
         grid.text(s,
@@ -63,21 +70,25 @@ plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", 
             0.5,
         just=c("right","center"),gp=gpar(fontsize=textLabelFrontFontSize))
     }
+
     popViewport()
 }
 
 
 plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10,
     doLine=TRUE, lineAlpha=0.5, lineType= "dotted", plotBottomToTop  = FALSE, plotNames,
-    spaceBetweenFeatures, center=FALSE,keepOrder=FALSE) {
+    spaceBetweenFeatures=featureHeight/8, center=FALSE,keepOrder=FALSE, scaleFeatureHeightToVP=FALSE) {
     ## key function used to plot read and tx annotation
     ## x is a GRanges object with blocks
     ## plotBottomToTop TRUE for "+" strand FALSE for minus strand
+    ## center: if the whole plotting should be centered in the view area
+    ## scaleFeatureToVP: should the featureHeight be scaled according to the viewport's area
+
     if(missing(coord)) {
         coord = c(min(start(x)), max(end(x)))
     }
 
-    thisMaxHeight = convertY(unit(1,"npc"),"points",valueOnly=TRUE)
+    thisMaxHeight = convertHeight(unit(1,"npc"),"points",valueOnly=TRUE)
 
     if(keepOrder){
         mybins = seq_len(length(x))
@@ -86,56 +97,64 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
     }
 
     nfeature = max(mybins)
-    marginSpace = thisMaxHeight - featureHeight * nfeature
 
-    ### avoid read overflow i.e. drawing space cannot acommodate this many feature given the size
-    featureHeight = min(featureHeight, thisMaxHeight/ nfeature)
-
-    if(!missing(spaceBetweenFeatures)){
-        ## space cannot exceed featureHeight
-        spaceBetweenReadsInPoint=  spaceBetweenFeatures
-        featureHeightInPoint = featureHeight
-        featureHeight = featureHeightInPoint + spaceBetweenReadsInPoint
-    } else{
-        spaceBetweenReadsInPoint = featureHeight/8
-        featureHeightInPoint = featureHeight - spaceBetweenReadsInPoint
+    if(scaleFeatureHeightToVP) {
+        ## scaling avoids overflow i.e. drawing space cannot acommodate this many feature given the size
+        featureHeightWithSpacing =  thisMaxHeight/nfeature
+        featureHeightSpacingRatio = featureHeight / (featureHeight + spaceBetweenFeatures)
+        featureHeight = featureHeightWithSpacing * featureHeightSpacingRatio
+        spaceBetweenFeatures = featureHeightSpacingRatio - featureHeight
+    } else {
+        featureHeightWithSpacing = featureHeight + spaceBetweenFeatures
     }
+
+    marginSpace = thisMaxHeight - featureHeightWithSpacing * nfeature
 
     myfeature = blocks(x)
     myx = unlist(start(myfeature))
 
     ## for - strand stack top to bottom, for + strand bottom to top
     if(plotBottomToTop){### usually for "+" strand
-        yPerRead = (mybins-1) * featureHeight
-        if(center) yPerRead = yPerRead + marginSpace/2
+        yPerRead = (mybins-1) * featureHeightWithSpacing
     } else{ ## usually for "-" strand
-        yPerRead = thisMaxHeight - mybins * featureHeight
-        if(center) yPerRead = yPerRead - marginSpace/2
+        ## we omit -1 here because grid.rect is left bottom justed
+        yPerRead = thisMaxHeight - mybins  * featureHeightWithSpacing
     }
+
+    yPerRead = yPerRead + spaceBetweenFeatures/2
+    if(center) {
+        yPerRead = yPerRead + sign(plotBottomToTop-0.5) * marginSpace/2
+    }
+
     nFeatureEach = lengths(myfeature)
     myy = rep(yPerRead, nFeatureEach)
-    if(length(featureCols)>1){
-        if(!(length(x) == length(featureCols))) stop("featureCols should have the same length as x or 1\n")
+
+    if (length(featureCols)>1) {
+        if( !(length(x) == length(featureCols)) )
+            stop("featureCols should have the same length as x or 1\n")
+        lineCols = rep(featureCols, nFeatureEach-1)
         featureCols = rep(featureCols, nFeatureEach)
+    } else {
+        lineCols = featureCols
     }
 
-    grid.rect(myx, unit(myy,"points"), width=unlist(width(myfeature)),
-        height=unit(featureHeightInPoint,"points"), gp=gpar(col = NA , fill = featureCols, alpha=featureAlpha),
-        default.units="native", just=c("left","bottom"))
+    grid.rect(myx, unit(myy,"points"), width=unlist(width(myfeature)), height=unit(featureHeight,"points"), gp=gpar(col = NA , fill = featureCols, alpha=featureAlpha), default.units="native", just=c("left","bottom"))
 
+    ## FIXME: wrap this as a function draw_line ?
     cumLength = cumsum(elementNROWS(myfeature))
     myxStart = unlist(end(myfeature))[-cumLength]
-    #lapply(end(myfeature),function(x) x[-length(x)])
+    ## lapply(end(myfeature),function(x) x[-length(x)])
     myxEnd = unlist(start(myfeature))[-c(1,cumLength[-length(cumLength)]+1)]
-    ## lapply(start(myfeature),function(x) x[-1])
-    myyLine = c(rep(yPerRead, nFeatureEach-1), rep(yPerRead, nFeatureEach-1))
 
     if(doLine & length(c(myxStart,myxEnd))>0){
         #penaltyFactorReadNumber = (1/log10(plotDat$param$normCountMat[txIdx,vpCol]))^2
+        ## lapply(start(myfeature),function(x) x[-1])
+        myyLine = c(rep(yPerRead, nFeatureEach-1), rep(yPerRead, nFeatureEach-1))
         grid.polyline(
-            x=unlist(c(myxStart,myxEnd)), y=unit(myyLine+ featureHeightInPoint/2,"points"),
+            x = unlist(c(myxStart,myxEnd)),
+            y = unit(myyLine + featureHeight/2,"points"),
             id = rep(1:length(unlist(myxStart)),2),
-            gp=gpar(col=featureCols,
+            gp=gpar(col=lineCols,
                 lwd=if(missing(lineWidth)) unit(min(1,featureHeight/10),"points") else {
                 unit(lineWidth,"points")},
             ## FIXME scale alpha depending on the number of reads
