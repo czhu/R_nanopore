@@ -29,8 +29,8 @@ default_config = function(...){
     ### height in points
     list(
         gene = list(color="black"),
-        geneModel=list(color="#984ea3", height=3),
-        geneModel_reduced = list( color = "#B771C2", height=3 ),
+        geneModel=list(color="#984ea3", height=2),
+        geneModel_reduced = list( color = "#B771C2", height=2),
         readConsensus=list(color="#4daf4a", height=5),
         read=list(color="steelblue")
     )
@@ -80,6 +80,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
         config = default_config()
     }
     genomeAxisHeight = 10
+    geneNameFontsize = 4
 
     extendLeft = 200 ## in bp
     extendRight = 200
@@ -92,7 +93,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     names(spacePerAnnotTrack) = c("Annot_plus","Annot_minus")
 
     ## height of the page
-    wholeSpaceHeight = convertY(unit(1,"npc"),"points",valueOnly=TRUE)
+    wholeSpaceHeight = convertHeight(unit(1,"npc"),"points",valueOnly=TRUE)
     # spacePerDataTrack = c(
     #     (wholeSpaceHeight - genomeAxisHeight)/2 - spacePerAnnotTrack["Annot_plus"],
     #     (wholeSpaceHeight - genomeAxisHeight)/2 - spacePerAnnotTrack["Annot_minus"])
@@ -104,20 +105,25 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     #     "axis"=genomeAxisHeight,"ie"=5,"ei"=5,
     #     spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
     ## extra 2 px spacing between data and annotation
+    geneTrackHeight = 4
+    geneNameTrackHeight = geneNameFontsize * 2
+    extraSpacingBetweenAxisAndMinusStrand = 2
 
     if(singleStrand){
         VP = c(
-            "axis"=genomeAxisHeight,
-            Gene_minus = ifelse(doHighlightGene, 5, 0),
-            Gene_name_minus = ifelse(doHighlightGene, 5, 0),
+            "axis"=genomeAxisHeight, extraSpacingBetweenAxisAndMinusStrand,
+            Gene_minus = ifelse(doHighlightGene, geneTrackHeight, 0),
+            Gene_name_minus = ifelse(doHighlightGene, geneNameTrackHeight, 0),
             spacePerAnnotTrack["Annot_minus"], spaceBetweenAnnotationAndData)
         VP = c(VP, "Data_minus" = wholeSpaceHeight - sum(VP) )
     } else {
         VP = c(
             spaceBetweenAnnotationAndData,  spacePerAnnotTrack["Annot_plus"],
-            Gene_name_plus=ifelse(doHighlightGene, 5, 0), Gene_plus = ifelse(doHighlightGene, 5, 0),
-            "axis"=genomeAxisHeight,
-            Gene_minus = ifelse(doHighlightGene, 5, 0), Gene_name_minus =ifelse(doHighlightGene, 5, 0),
+            Gene_name_plus=ifelse(doHighlightGene, geneNameTrackHeight, 0),
+            Gene_plus = ifelse(doHighlightGene, geneTrackHeight, 0),
+            "axis"=genomeAxisHeight, extraSpacingBetweenAxisAndMinusStrand,
+            Gene_minus = ifelse(doHighlightGene, geneTrackHeight, 0),
+            Gene_name_minus =ifelse(doHighlightGene, geneNameTrackHeight, 0),
             spacePerAnnotTrack["Annot_minus"], spaceBetweenAnnotationAndData)
         VP = c("Data_plus" = (wholeSpaceHeight - sum(VP))/2, VP, "Data_minus" = (wholeSpaceHeight - sum(VP))/2 )
     }
@@ -177,24 +183,24 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     }
 
     for(thisStrd in names(strds) ){
-
+        isPlusStrand = thisStrd == "+"
         if(doHighlightGene & length(plotDat$gene)>0){
             if(any(strand(plotDat$gene)== thisStrd)) {
                 isThiStrd = as.logical(strand(plotDat$gene)== thisStrd)
                 plot_feature_vpr(plotDat$gene[isThiStrd],vpr=which(names(VP)== paste0("Gene_", strds[thisStrd]) ),
-                coord=coord, featureHeight=0.5, plotBottomToTop=TRUE, featureCols= config$gene$color,
-                    doLine=FALSE,center=TRUE,spaceBetweenFeatures=1)
+                coord=coord, featureHeight=0.5, plotBottomToTop = isPlusStrand,
+                featureCols= config$gene$color, doLine=FALSE, center=TRUE, spaceBetweenFeatures=1)
                 plot_feature_text_vpr(plotDat$gene[isThiStrd],
                     plotDat$gene$name[isThiStrd], vpr=which(names(VP)== paste0("Gene_name_", strds[thisStrd])),
-                    coord, fontsize=HIGHLIGHT_FONTSIZE, side=0, col="black",
-                    plotBottomToTop=TRUE,debug=FALSE)
+                    coord, fontsize=geneNameFontsize, side=0, col="black",
+                    plotBottomToTop = isPlusStrand, debug=FALSE)
             }
         }
 
         if(any(strand(myannot)== thisStrd)) {
             thisFeature = subset(myannot, strand== thisStrd)
             plot_feature_vpr( thisFeature, vpr=which(names(VP)== paste0("Annot_", strds[thisStrd])),coord=coord,
-                featureHeight=config$geneModel$height, plotBottomToTop=TRUE,
+                featureHeight=config$geneModel$height, plotBottomToTop=isPlusStrand,
                 featureCols= if(is.null(thisFeature$itemRgb)) {config$geneModel$color} else {thisFeature$itemRgb},
                 doLine=FALSE,center=TRUE)
         }
@@ -203,8 +209,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
             myannot2 = plotDat$geneModel_reduced
             if(any(strand(myannot2)== thisStrd)) {
                 plot_feature_vpr(subset(myannot2, strand== thisStrd),vpr=which(names(VP)== paste0("Annot_reduced_", strds[thisStrd])),
-                coord=coord, featureHeight=config$geneModel_reduced$height, plotBottomToTop=TRUE,
-                featureCols=config$geneModel_reduced$color,
+                coord=coord, featureHeight=config$geneModel_reduced$height, plotBottomToTop=isPlusStrand, featureCols=config$geneModel_reduced$color,
                 doLine=FALSE,center=TRUE)
             }
         }
@@ -255,27 +260,26 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                     trackHeightShift[trackIndex-1]+spaceBetweenCluster
                                 }
                             },"points")
-                        thisHeight = unit(ct_to_drawPoint(thisCluster$count),"points")
+                        thisHeight = ct_to_drawPoint(thisCluster$count)
                         pushViewport(
                             viewport(
                             x = thisx, y = thisy,
                             width = unit(width(thisCluster),"native"),
                             clip="off",just=c("left","bottom"),
                             xscale=c(start(thisCluster),end(thisCluster)),
-                            height=thisHeight
+                            height = unit(thisHeight, "points")
                             )
                         )
                         if(doConsensus){
-                            featureHeightConsensus = unit(config$readConsensus$height, "points")
-                            if(thisStrd=="+"){
-                                newy1 = 0
-                                newy2 = featureHeightConsensus
+                            featureHeightConsensus = config$readConsensus$height
+                            if(isPlusStrand){
+                                newy1 = unit(0, "points")
+                                newy2 = unit(featureHeightConsensus, "points")
                             } else{
-                                newy1 = unit(round(convertY(unit(1,"npc"),"points",valueOnly=TRUE) - as.integer(featureHeightConsensus)),"points")
-                                newy2 = 0
+                                newy1 = unit(round(convertY(unit(1,"npc"),"points",valueOnly=TRUE) - featureHeightConsensus),"points")
+                                newy2 = unit(0, "points")
                             }
-                            # message(thisStrd,"\t",convertY(thisHeight-featureHeightConsensus,"points",valueOnly=TRUE),
-                            #     "\t",convertY(unit(1,"npc"),"points",valueOnly=TRUE),"\t", as.integer(newy1))
+
                             pushViewport(
                                 viewport(
                                 x = thisx,
@@ -283,27 +287,25 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                 width = unit(width(thisCluster),"native"),
                                 clip="off",just=c("left","bottom"),
                                 xscale=c(start(thisCluster),end(thisCluster)),
-                                height= featureHeightConsensus
-                                ))
+                                height= unit(featureHeightConsensus, "points"))
+                            )
                             plot_feature(thisCluster,
                                 featureCols = if(is.null(thisCluster$itemRgb)) {"black"} else {thisCluster$itemRgb},
-                                    featureHeight=as.integer(featureHeightConsensus),
-                                    doLine=TRUE,lineAlpha=1,lineType= "dotted",
-                                    plotBottomToTop = ifelse(thisStrd=="+",TRUE,FALSE),
-                                    center=TRUE)
+                                featureHeight = featureHeightConsensus, doLine=TRUE,lineAlpha=1,lineType= "dotted",
+                                    plotBottomToTop = isPlusStrand, center=TRUE)
                             if(DO_CONSENSUS_NAME){
                                 if(shiftLabel) {
                                     plot_feature_text(
                                         thisCluster,
                                         thisCluster$name, fontsize=CONSENSUS_NAME_FONTSIZE, side=0, col="black",
                                         #just=c("center",ifelse(thisStrd == "+" , "bottom","top")),
-                                        yjust = ifelse(thisStrd=="+", 2, -0.8),
+                                        yjust = ifelse(isPlusStrand, 2, -0.8),
                                         xjust = 0.5,
-                                        plotBottomToTop = (thisStrd =="+"), debug=FALSE)
+                                        plotBottomToTop = isPlusStrand, debug=FALSE)
                                 } else {
                                     plot_feature_text(
                                         thisCluster,
-                                        thisCluster$name, fontsize=CONSENSUS_NAME_FONTSIZE, side=0, col="black", plotBottomToTop = (thisStrd =="+"), debug=FALSE)
+                                        thisCluster$name, fontsize=CONSENSUS_NAME_FONTSIZE, side=0, col="black", plotBottomToTop = isPlusStrand, debug=FALSE)
                                 }
                             }
                             if(doHighlight){
@@ -322,9 +324,9 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                             thisEnd = end(plotDat$highlight[[wh]]$highlight)
                                             plot_feature(plotDat$highlight[[wh]]$highlight,
                                                 featureCols="gray4",
-                                                    featureHeight=as.integer(featureHeightConsensus)-2,
-                                                    doLine=FALSE,featureAlpha=0.5,
-                                                    plotBottomToTop = ifelse(thisStrd=="+",TRUE,FALSE),
+                                                    featureHeight = featureHeightConsensus-2,
+                                                    doLine=FALSE,featureAlpha=0.4,
+                                                    plotBottomToTop = isPlusStrand,
                                                     center=TRUE)
                                             grid.text(plotDat$highlight[[wh]]$highlight$shape,
                                                 x = convertX(unit((thisStart+thisEnd)/2,"native"),"npc"),
@@ -341,7 +343,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                                 width = unit(width(thisCluster),"native"),
                                 clip="off",just=c("left","bottom"),
                                 xscale=c(start(thisCluster),end(thisCluster)),
-                                height = thisHeight - featureHeightConsensus
+                                height = unit(thisHeight - featureHeightConsensus, "points")
                                 )
                             )
                         }
@@ -355,7 +357,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
                             featureCols=mycols,
                             featureHeight=featureHeightPerRead,
                             doLine=TRUE,lineAlpha=1,lineType= "dotted",
-                            plotBottomToTop = ifelse(thisStrd=="+",TRUE,FALSE),
+                            plotBottomToTop = isPlusStrand,
                             center=TRUE)
                         if(doConsensus) popViewport()
 
