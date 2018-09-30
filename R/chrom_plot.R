@@ -59,7 +59,7 @@ CONSENSUS_NAME_FONTSIZE = 3.5
 DO_CONSENSUS_NAME = TRUE
 
 chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
-    spaceBetweenCluster = 5, debug = TRUE,doConsensus=TRUE, config,     spaceBetweenAnnotationAndData = 4, singleStrand=FALSE, shiftLabel=FALSE){
+    spaceBetweenCluster = 5, debug = TRUE,doConsensus=TRUE, config,     spaceBetweenAnnotationAndData = 4, singleStrand=FALSE, shiftLabel=FALSE,     geneTrackHeight = 4, geneNameFontsize = 4, geneNameTrackHeight = geneNameFontsize * 2){
     # x is plot data
     # plotDat = list(
     #     consensus = thisCluster, this should contian count
@@ -80,7 +80,6 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
         config = default_config()
     }
     genomeAxisHeight = 10
-    geneNameFontsize = 4
 
     extendLeft = 200 ## in bp
     extendRight = 200
@@ -105,8 +104,6 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
     #     "axis"=genomeAxisHeight,"ie"=5,"ei"=5,
     #     spacePerAnnotTrack["Annot_minus"], spacePerDataTrack["Data_minus"])
     ## extra 2 px spacing between data and annotation
-    geneTrackHeight = 4
-    geneNameTrackHeight = geneNameFontsize * 2
     extraSpacingBetweenAxisAndMinusStrand = 2
 
     if(singleStrand){
