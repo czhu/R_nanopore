@@ -18,21 +18,26 @@ new_vp = function(main, cexMain=1, dataPanelHeight=1, vpHeight=0.7, titleOffSet=
   return(which(names(vpr)=="data"))
 }
 
-plot_coord = function(coord, vpr) {
+plot_coord = function(coord, vpr, center=FALSE) {
     if(missing(vpr)) {
         vpr = new_vp()
     }
-
+    fontcex = 0.5
     ############ draw coord
     pushViewport(dataViewport(xData=coord, yscale=c(0,0.3), extension=0, clip="off",
                               layout.pos.col=1, layout.pos.row=vpr))
-    grid.lines(coord, c(0,0), default.units = "native")
+    segmentsHeight = 0.08 ## native
+    if(center){
+        y0 = (0.3 - convertY(unit(get.gpar("lwd")$lwd + get.gpar("fontsize")$fontsize * fontcex, "points"),  "native", valueOnly=TRUE) - segmentsHeight)/2
+    } else{
+        y0 = 0
+    }
+    grid.lines(coord, c(y0,y0), default.units = "native")
     tck = alongChromTicks(coord)
-    grid.text(label=formatC(tck, format="d"), x = tck, y = 0.1,
-              just = c("centre", "bottom"), gp = gpar(cex=.5), default.units = "native")
-    grid.segments(x0 = tck, x1 = tck, y0 = 0, y1 = 0.08,  default.units = "native")
+    grid.text(label=formatC(tck, format="d"), x = tck, y = y0 + 0.1,
+              just = c("centre", "bottom"), gp = gpar(cex=fontcex), default.units = "native")
+    grid.segments(x0 = tck, x1 = tck, y0 = y0, y1 = y0 + segmentsHeight,  default.units = "native")
     popViewport()
-
 }
 
 ### this is core plotting function for plotting granges with exons (in blocks slot)
