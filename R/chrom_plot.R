@@ -73,7 +73,7 @@ validate_plotdat = function(x){
 
 
 chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
-    spaceBetweenCluster = 5, debug = TRUE,doConsensus=TRUE, config,     spaceBetweenAnnotationAndData = 4, singleStrand=FALSE, shiftLabel=FALSE,     geneTrackHeight = 4, geneNameFontsize = 4, geneNameTrackHeight = geneNameFontsize * 2,
+    spaceBetweenCluster = 5, debug = TRUE,doConsensus=TRUE, config,     spaceBetweenAnnotationAndData = 4, singleStrand=FALSE, shiftLabel=FALSE, annotationTrackHeight=2, geneTrackHeight = 4, geneNameFontsize = 4, geneNameTrackHeight = geneNameFontsize * 2,
         consensusNameFontsize = 3.5, doConsensusName=TRUE, highlightFontsize=4,     genomeAxisHeight = 10
     ){
     CONSENSUS_NAME_FONTSIZE = consensusNameFontsize
@@ -107,7 +107,7 @@ chrom_plot = function(plotDat,coord, plotCountNum=TRUE,featureHeightPerRead = 3,
         trsf_ct_nread(x)*featureHeightPerRead*2
     }
 
-    spacePerAnnotTrack = rep(2,2)
+    spacePerAnnotTrack = rep(annotationTrackHeight,2)
     names(spacePerAnnotTrack) = c("Annot_plus","Annot_minus")
 
     ## height of the page
