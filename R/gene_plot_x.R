@@ -160,7 +160,7 @@ gene_plot_multi_panel = function(GeneModel, txConsensus, txReadsList, txHighligh
 
 gene_plot_single_panel = function(GeneModel, txConsensus, txReads, txHighlight,
     title, plotTopToBottom=TRUE, axisHeight= 15, consensusTrackHeight = 5,
-    consensusFeatureHeight = 4,trackHeights, readHeight) {
+    consensusFeatureHeight = 4,trackHeights, readHeight, extraSpacingConsensus = 0 ) {
 
     if(!missing(title)){
         add_title(title, titleHeight=10)
@@ -177,6 +177,9 @@ gene_plot_single_panel = function(GeneModel, txConsensus, txReads, txHighlight,
                 txReads[[i%/%2]]
             }
         })
+    # tmpdata = lapply( seq_len(length(txConsensus) *3), function(xx) as.numeric(NA) )
+    # tmpdata[-seq(1, length(txConsensus) *3, by = 3)] = plotData
+
     plotData = c(list(GeneModel), plotData)
 
     ## config for Gene Model track
@@ -196,7 +199,7 @@ gene_plot_single_panel = function(GeneModel, txConsensus, txReads, txHighlight,
         trackHeightsConsensus = rep(consensusTrackHeight, length(txConsensus))
 
         spaceLeftForReads = totalHeightInPoints - axisHeight -
-            sum(trackHeightsConsensus) - geneModelTrackHeight
+            sum(trackHeightsConsensus) - geneModelTrackHeight - sum(rep(extraSpacingConsensus, length(txConsensus)))
 
         # if(spaceLeftForReads<100){
         #     stop("not enough space for plotting reads, considering inrease page height")
@@ -207,13 +210,18 @@ gene_plot_single_panel = function(GeneModel, txConsensus, txReads, txHighlight,
         }
 
         trackHeightData = nreadsPerTrack * readHeight
-        trackHeights =  c(geneModelTrackHeight, sapply(seq_len(length(txConsensus) * 2), function(i){
+        trackHeights =  sapply(seq_len(length(txConsensus) * 2), function(i){
                 if(i%%2){
                     trackHeightsConsensus[i%/%2+1]
                 } else {
                     trackHeightData[i%/%2]
                 }
-            }))
+            })
+
+        # tmpdata = sapply(seq_len(length(txConsensus) *3), function(na) as.numeric(NA))
+        # tmpdata[-seq(1, length(txConsensus) *3, by = 3)] = trackHeights
+        #trackHeights = tmpdata
+        trackHeights = c(geneModelTrackHeight, trackHeights)
     }
 
     plotConfig = lapply(seq_len(length(txConsensus) * 2), function(i){
@@ -227,6 +235,7 @@ gene_plot_single_panel = function(GeneModel, txConsensus, txReads, txHighlight,
                 thisTxName = granges(txConsensus[i%/%2+1])
                 thisTxName$label = txConsensus[i%/%2+1]$name
                 ans$highlight = thisTxName
+                ans$plotBottomToTop = FALSE
 
                 if(!is.null(txHighlight[[i%/%2 + 1]]$highlight)){
                     thisHighlight = granges(txHighlight[[i%/%2 + 1]]$highlight)
@@ -244,19 +253,22 @@ gene_plot_single_panel = function(GeneModel, txConsensus, txReads, txHighlight,
     plotConfig = c(list(geneModelConfig), plotConfig)
 
     txClass_plotter(plotData, plotConfig, axisHeight=axisHeight,
-        trackHeights = trackHeights)
+        trackHeights = trackHeights, extraSpacing = extraSpacingConsensus)
     if(!missing(title))
         popViewport()
     popViewport()
 }
 
-
 txClass_plotter = function(plotData, plotConfig, plotTopToBottom=TRUE,
-    trackHeights, axisHeight) {
-    if( length( plotData ) != length( plotConfig) )
-        stop("Data and config and must have same number of elements")
+    trackHeights, axisHeight, extraSpacing) {
 
     nDataTracks = length(plotData)
+
+    if( nDataTracks != length( plotConfig) ){
+        message(nDataTracks, " vs ", length(plotConfig))
+        stop("Data and config and must have same number of elements")
+    }
+
 
     defaultUnit = "points"
     extraMargin = 1000 ## in bp
@@ -265,8 +277,18 @@ txClass_plotter = function(plotData, plotConfig, plotTopToBottom=TRUE,
     ## trackHeights
     #VP = c(axisHeight, sapply(plotConfig, "[[", "trackHeight") )
     VP = c(axisHeight, trackHeights)
-
     names(VP) = c("Axis",  paste0(dataTrackPrefix, seq_len( length(plotData) )) )
+    message(names(VP))
+
+    if(!missing(extraSpacing)) {
+        newVP = rep(extraSpacing, length(VP)*2-1)
+        names(newVP) = "test"
+        spacingIndex = seq(2, length(VP)*2-1, by=2)
+        newVP[-spacingIndex] = VP
+        names(newVP)[-spacingIndex]=names(VP)
+        VP = newVP
+        message(names(VP))
+    }
 
     if( !plotTopToBottom ) VP = rev(VP)
 
@@ -282,7 +304,7 @@ txClass_plotter = function(plotData, plotConfig, plotTopToBottom=TRUE,
 
     plot_coord( coord, vpr = which( names(VP) == "Axis" ) )
 
-    for(i in seq_len( nDataTracks )){
+    for(i in seq_len( nDataTracks ) ){
         vprIndex = which(names(VP)==paste0(dataTrackPrefix, i))
         thisPlotConfig = plotConfig[[i]]
         thisPlotData = plotData[[i]]
@@ -305,7 +327,7 @@ txClass_plotter = function(plotData, plotConfig, plotTopToBottom=TRUE,
                 lineAlpha = get_value("lineAlpha"),
                 lineType = get_value("dotted"),
                 spaceBetweenFeatures = get_value("spaceBetweenFeatures"),
-                plotBottomToTop = !plotTopToBottom,
+                plotBottomToTop = get_value("plotBottomToTop"),
                 center = get_value("center"),
                 lineWidth = get_value("lineWidth"),
                 textLabelFront = get_value("textLabelFront")
@@ -318,7 +340,7 @@ txClass_plotter = function(plotData, plotConfig, plotTopToBottom=TRUE,
                     vpr = vprIndex,
                     coord = coord,
                     fontsize = get_value("highlightFontsize"),
-                    side = 0,
+                    side = 2,
                     col = get_value("highlightColor"),
                     plotBottomToTop = !plotTopToBottom )
             }
