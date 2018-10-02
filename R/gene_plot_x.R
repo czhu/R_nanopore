@@ -278,16 +278,14 @@ txClass_plotter = function(plotData, plotConfig, plotTopToBottom=TRUE,
     #VP = c(axisHeight, sapply(plotConfig, "[[", "trackHeight") )
     VP = c(axisHeight, trackHeights)
     names(VP) = c("Axis",  paste0(dataTrackPrefix, seq_len( length(plotData) )) )
-    message(names(VP))
 
     if(!missing(extraSpacing)) {
         newVP = rep(extraSpacing, length(VP)*2-1)
-        names(newVP) = "test"
+        names(newVP) = "spacing"
         spacingIndex = seq(2, length(VP)*2-1, by=2)
         newVP[-spacingIndex] = VP
         names(newVP)[-spacingIndex]=names(VP)
         VP = newVP
-        message(names(VP))
     }
 
     if( !plotTopToBottom ) VP = rev(VP)
