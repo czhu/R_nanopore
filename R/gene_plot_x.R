@@ -78,6 +78,7 @@ plot_config_default = function(...){
 
 add_title = function (title, titleHeight=10,titleFontSize = 7) {
     totalHeightInPoints = convertHeight(unit(1,"npc"),"points",valueOnly=TRUE)
+    message(totalHeightInPoints)
     pushViewport(
         viewport(
             layout = grid.layout(2, 1,
@@ -201,9 +202,6 @@ gene_plot_single_panel = function(GeneModel, txConsensus, txReads, txHighlight,
         spaceLeftForReads = totalHeightInPoints - axisHeight -
             sum(trackHeightsConsensus) - geneModelTrackHeight - sum(rep(extraSpacingConsensus, length(txConsensus)))
 
-        # if(spaceLeftForReads<100){
-        #     stop("not enough space for plotting reads, considering inrease page height")
-        # }
         nreadsPerTrack = sapply(txReads, length)
         if(missing(readHeight)){
             readHeight = spaceLeftForReads/sum(nreadsPerTrack)
@@ -218,9 +216,6 @@ gene_plot_single_panel = function(GeneModel, txConsensus, txReads, txHighlight,
                 }
             })
 
-        # tmpdata = sapply(seq_len(length(txConsensus) *3), function(na) as.numeric(NA))
-        # tmpdata[-seq(1, length(txConsensus) *3, by = 3)] = trackHeights
-        #trackHeights = tmpdata
         trackHeights = c(geneModelTrackHeight, trackHeights)
     }
 
@@ -252,8 +247,11 @@ gene_plot_single_panel = function(GeneModel, txConsensus, txReads, txHighlight,
         })
     plotConfig = c(list(geneModelConfig), plotConfig)
 
+    thisSpacing = rep(0, length(plotData))
+    thisSpacing[seq(1,length(thisSpacing), by=2)] = extraSpacingConsensus
+
     txClass_plotter(plotData, plotConfig, axisHeight=axisHeight,
-        trackHeights = trackHeights, extraSpacing = extraSpacingConsensus)
+        trackHeights = trackHeights, extraSpacing = thisSpacing)
     if(!missing(title))
         popViewport()
     popViewport()
@@ -276,17 +274,23 @@ txClass_plotter = function(plotData, plotConfig, plotTopToBottom=TRUE,
 
     ## trackHeights
     #VP = c(axisHeight, sapply(plotConfig, "[[", "trackHeight") )
-    VP = c(axisHeight, trackHeights)
-    names(VP) = c("Axis",  paste0(dataTrackPrefix, seq_len( length(plotData) )) )
 
-    if(!missing(extraSpacing)) {
-        newVP = rep(extraSpacing, length(VP)*2-1)
-        names(newVP) = "spacing"
-        spacingIndex = seq(2, length(VP)*2-1, by=2)
-        newVP[-spacingIndex] = VP
-        names(newVP)[-spacingIndex]=names(VP)
-        VP = newVP
+    if(missing(extraSpacing)){
+        extraSpacing = rep(0, length(nDataTracks))
     }
+
+    if( length(extraSpacing) != nDataTracks ){
+        stop("extraSpacing needs to have the same length as plotData")
+    }
+    newTrackHeights = rep(0, nDataTracks*2)
+    newTrackHeights[seq(1, length(newTrackHeights), by=2)] = trackHeights
+    newTrackHeights[seq(2, length(newTrackHeights), by=2)] = extraSpacing
+
+    names(newTrackHeights) = rep("spacing", length(newTrackHeights)/2)
+    names(newTrackHeights)[seq(1, length(newTrackHeights), by=2)] = paste0(dataTrackPrefix, seq_len( nDataTracks ))
+
+    VP = c(axisHeight, newTrackHeights)
+    names(VP) = c("Axis",  names(newTrackHeights))
 
     if( !plotTopToBottom ) VP = rev(VP)
 
