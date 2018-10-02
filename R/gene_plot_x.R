@@ -78,7 +78,6 @@ plot_config_default = function(...){
 
 add_title = function (title, titleHeight=10,titleFontSize = 7) {
     totalHeightInPoints = convertHeight(unit(1,"npc"),"points",valueOnly=TRUE)
-    message(totalHeightInPoints)
     pushViewport(
         viewport(
             layout = grid.layout(2, 1,
