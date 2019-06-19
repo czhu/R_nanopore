@@ -18,7 +18,7 @@ extractIntrons = function(x){
         IRanges(start=allends+1, end=allstarts-1),
         strand=rep(as.character(strand(x)), nexons-1)
     )
-    ans = asBED(split(ans, factor(myfac,1:length(x))))
+    ans = asBED(GenomicRanges::split(ans, factor(myfac,1:length(x))))
     if( !is.null(names(blocks(x))) ){
         names(ans) = names(blocks(x))
     }
