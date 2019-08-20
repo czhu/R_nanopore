@@ -78,7 +78,7 @@ plot_feature_vpr  = function(x, vpr, coord, lineWidth, featureCols="steelblue", 
 }
 
 
-plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10,
+plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAlpha=1, featureHeight=10, featureBorderColor=NA,
     doLine=TRUE, lineAlpha=0.5, lineType= "dotted", plotBottomToTop  = FALSE, plotNames,
     spaceBetweenFeatures, center=FALSE,keepOrder=FALSE, scaleFeatureHeightToVP=FALSE) {
     ## key function used to plot read and tx annotation
@@ -154,7 +154,7 @@ plot_feature  = function(x, coord, lineWidth, featureCols="steelblue", featureAl
         lineCols = featureCols
     }
 
-    grid.rect(myx, unit(myy,"points"), width=unlist(width(myfeature)), height=unit(featureHeight, "points"), gp=gpar(col = NA , fill = featureCols, alpha=featureAlpha), default.units="native", just=c("left","bottom"))
+    grid.rect(myx, unit(myy,"points"), width=unlist(width(myfeature)), height=unit(featureHeight, "points"), gp=gpar(col=featureBorderColor, fill=featureCols, alpha=featureAlpha), default.units="native", just=c("left","bottom"))
 
     ## FIXME: wrap this as a function draw_line ?
     cumLength = cumsum(elementNROWS(myfeature))
