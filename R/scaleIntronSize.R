@@ -8,13 +8,16 @@
 #     GRanges("x:200-210"))
 # ))
 #plotRanges(ranges(unlist(blocks(rv))))
+# untested
 scaleIntronSize = function(tx, scaleFun=log10){
     ## plotRanges(ranges(unlist(blocks(tx))))
+    nexons = function(x) lengths(blocks(x))
     intrn = extractIntrons(tx)
     intronSizeAfterScalling = scaleFun(width(blocks(intrn)))
-    sizeShift = rep(0, sum(lengths(blocks(tx))))
-    sizeShift[-c(1,lengths(blocks(tx))[-length(tx)] +1)] = unlist(width(blocks(intrn))) - unlist(intronSizeAfterScalling)
-
+    sizeShift = rep( 0, sum(nexons(tx)) )
+    ## index of first exon of each transcript
+    indexFirstExonEachTranscript = c(1, cumsum(nexons(tx))[-length(tx)] +1)
+    sizeShift[-indexFirstExonEachTranscript] = unlist(width(blocks(intrn))) - unlist(intronSizeAfterScalling)
     sizeShift = unlist(cumsum(relist(sizeShift, blocks(tx))))
 
     txTmp = unlist(blocks(tx))
