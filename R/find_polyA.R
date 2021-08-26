@@ -12,7 +12,7 @@ find_polyA = function(myseqs, n=12, max.mismatch=1L,hitBy="length",use.names=TRU
         )
 
     res = lapply(1:length(adapters), function(i) {
-        ans = as_tibble(find_polyN(sread(myseqs), adapters[[i]]),max.mismatch=max.mismatch)
+        ans = as_tibble(as.data.frame(find_polyN(sread(myseqs), adapters[[i]]),max.mismatch=max.mismatch))
         if(nrow(ans)>0) ans$adapter_id = i
         ans
     })
