@@ -5,16 +5,16 @@ match_adapter = function(myseqs, adapters,use.names=TRUE,
     ## avoidPartialMappingOnEnd is highly experimental
     pwa_2_tibble = function(x) {
         tibble(
-            start = start(pattern(x)),
-            end = end(pattern(x)),
+            start = start(Biostrings::pattern(x)),
+            end = end(Biostrings::pattern(x)),
             group = 1:length(x),
             score = score(x),
             match_length = Biostrings::nchar(x),
             pid = pid(x),
-            match_seq_read = as.character(pattern(x)),
-            match_seq_adapter = as.character(subject(x)),
-            aStart = start(subject(x)),
-            aEnd = end(subject(x))
+            match_seq_read = as.character(Biostrings::pattern(x)),
+            match_seq_adapter = as.character(Biostrings::subject(x)),
+            aStart = start(Biostrings::subject(x)),
+            aEnd = end(Biostrings::subject(x))
             )
     }
 
